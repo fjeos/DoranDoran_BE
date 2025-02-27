@@ -2,3 +2,12 @@ spring:
   application:
     name:
       DoranDroan
+
+
+jwt:
+  access:
+    secret: ${JWT_ACCESS_KEY}
+    expiration: 1800000  # 30분
+  refresh:
+    secret: ${JWT_REFRESH_KEY}
+    expiration: 604800000  # 7일
