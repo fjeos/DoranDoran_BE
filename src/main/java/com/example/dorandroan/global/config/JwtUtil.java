@@ -3,9 +3,11 @@ package com.example.dorandroan.global.config;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
-import lombok.Value;
+
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
@@ -15,22 +17,21 @@ import java.sql.Date;
 @Component
 @RequiredArgsConstructor
 public class JwtUtil {
+    private final JwtProperties jwtProperties;
+    private Key accessKey;
+    private Key refreshKey;
+    private long accessExpTime;
+    private long refreshExpTime;
 
-    private final long accessExpTime;
-    private final long refreshExpTime;
-    private final Key accessKey;
-    private final Key refreshKey;
-
-    public JwtUtil(final String accessSecret,
-                   final String refreshSecret,
-                   final long accessExpTime,
-                   final long refreshExpTime) {
-        byte[] accessBytes = Decoders.BASE64.decode(accessSecret);
-        byte[] refreshBytes = Decoders.BASE64.decode(refreshSecret);
+    @PostConstruct
+    private void initKeys() {
+        byte[] accessBytes = Decoders.BASE64.decode(jwtProperties.getAccess().getSecret());
+        byte[] refreshBytes = Decoders.BASE64.decode(jwtProperties.getRefresh().getSecret());
         this.accessKey = Keys.hmacShaKeyFor(accessBytes);
         this.refreshKey = Keys.hmacShaKeyFor(refreshBytes);
-        this.accessExpTime = accessExpTime;
-        this.refreshExpTime = refreshExpTime;
+
+        this.accessExpTime = jwtProperties.getAccess().getExpiration();
+        this.refreshExpTime = jwtProperties.getRefresh().getExpiration();
     }
 
     public String createAccessToken(Long memberId, String role) {

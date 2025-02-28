@@ -1,8 +1,10 @@
 package com.example.dorandroan.global.jwt;
 
+import com.example.dorandroan.dto.MemberLoginRequestDto;
 import com.example.dorandroan.dto.MemberLoginResponseDto;
 import com.example.dorandroan.entity.Member;
 import com.example.dorandroan.global.config.JwtUtil;
+import com.example.dorandroan.repository.MemberRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import jakarta.servlet.FilterChain;
@@ -23,20 +25,29 @@ import java.io.IOException;
 public class CustomAuthFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationManager authenticationManager;
+    private final MemberRepository memberRepository;
     private final JwtUtil jwtUtil;
-    public CustomAuthFilter(AuthenticationManager authenticationManager, JwtUtil jwtUtil) {
+
+    public CustomAuthFilter(AuthenticationManager authenticationManager, JwtUtil jwtUtil, MemberRepository memberRepository) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
-        setRequiresAuthenticationRequestMatcher(new AntPathRequestMatcher("/users/login", "POST"));
+        this.memberRepository = memberRepository;
+        setRequiresAuthenticationRequestMatcher(new AntPathRequestMatcher("/member/login", "POST"));
     }
 
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
 
-        String username = obtainUsername(request);
-        String password = obtainPassword(request);
+        try {
+            MemberLoginRequestDto requestDto = new ObjectMapper().readValue(
+                    request.getInputStream(),
+                    MemberLoginRequestDto.class
+            );
 
-        return authenticationManager
-                .authenticate(new UsernamePasswordAuthenticationToken(username, password, null));
+            return authenticationManager
+                    .authenticate(new UsernamePasswordAuthenticationToken(requestDto.getEmail(), requestDto.getPassword(), null));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -51,7 +62,7 @@ public class CustomAuthFilter extends UsernamePasswordAuthenticationFilter {
         String refreshToken = jwtUtil.createRefreshToken(member.getMemberId(), member.getRole().toString());
 
         member.publishToken(refreshToken);
-        System.out.println(member.getRefreshToken());
+        memberRepository.save(member);
 
         response.setContentType("application/json;charset=UTF-8");
         response.setStatus(HttpServletResponse.SC_OK);
