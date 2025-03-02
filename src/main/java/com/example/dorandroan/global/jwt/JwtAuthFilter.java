@@ -1,6 +1,5 @@
 package com.example.dorandroan.global.jwt;
 
-import com.example.dorandroan.global.config.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

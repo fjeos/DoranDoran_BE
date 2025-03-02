@@ -5,7 +5,6 @@ import com.example.dorandroan.entity.Member;
 import com.example.dorandroan.entity.Role;
 import com.example.dorandroan.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,7 +23,7 @@ public class MemberService {
             throw new IllegalArgumentException("Already Exists");
         }
 
-        Member member = memberRepository.save(Member.builder().email(requestDto.getEmail())
+        memberRepository.save(Member.builder().email(requestDto.getEmail())
                 .password(passwordEncoder.encode(requestDto.getPassword()))
                 .nickname(requestDto.getNickname())
                 .profileImg(null)

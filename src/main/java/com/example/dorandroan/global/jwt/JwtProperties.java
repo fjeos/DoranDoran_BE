@@ -1,4 +1,4 @@
-package com.example.dorandroan.global.config;
+package com.example.dorandroan.global.jwt;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

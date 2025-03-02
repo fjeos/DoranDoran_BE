@@ -3,7 +3,6 @@ package com.example.dorandroan.global.config;
 import com.example.dorandroan.global.jwt.*;
 import com.example.dorandroan.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;

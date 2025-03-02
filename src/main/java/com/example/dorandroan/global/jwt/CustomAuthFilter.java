@@ -3,7 +3,6 @@ package com.example.dorandroan.global.jwt;
 import com.example.dorandroan.dto.MemberLoginRequestDto;
 import com.example.dorandroan.dto.MemberLoginResponseDto;
 import com.example.dorandroan.entity.Member;
-import com.example.dorandroan.global.config.JwtUtil;
 import com.example.dorandroan.repository.MemberRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
