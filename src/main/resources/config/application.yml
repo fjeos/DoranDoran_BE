@@ -1,0 +1,23 @@
+spring:
+  application:
+    name:
+      DoranDroan
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/doran
+    username: root
+    password: '0000'
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        show-sql: true
+jwt:
+  access:
+    secret: ${JWT_ACCESS_KEY}
+    expiration: ${JWT_ACCESS_EXP}  # 30분
+  refresh:
+    secret: ${JWT_REFRESH_KEY}
+    expiration: ${JWT_REFRESH_EXP}  # 7일
