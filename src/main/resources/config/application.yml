@@ -4,9 +4,9 @@ spring:
       DoranDroan
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/doran
-    username: root
-    password: '0000'
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PW}
   jpa:
     hibernate:
       ddl-auto: update
