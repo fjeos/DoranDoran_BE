@@ -1,5 +1,7 @@
 package com.example.dorandroan.global.jwt;
 
+import com.example.dorandroan.global.RestApiException;
+import com.example.dorandroan.global.error.MemberErrorCode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,5 +26,6 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
                        AccessDeniedException accessDeniedException) throws IOException, ServletException {
         log.error("권한이 없습니다.", accessDeniedException);
         //TODO 이후 처리
+        throw new RestApiException(MemberErrorCode.USER_NOT_FOUND);
     }
 }

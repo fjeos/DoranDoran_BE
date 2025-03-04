@@ -18,10 +18,13 @@ public class MemberService {
 
     @Transactional
     public void signUp(SignUpRequestDto requestDto) {
+        System.out.println("서비스");
 
         if (findByNickname(requestDto.getNickname()) || findByEmail(requestDto.getEmail())) {
+            System.out.println("닉네임 중복");
             throw new IllegalArgumentException("Already Exists");
         }
+        System.out.println("통과");
 
         memberRepository.save(Member.builder().email(requestDto.getEmail())
                 .password(passwordEncoder.encode(requestDto.getPassword()))
