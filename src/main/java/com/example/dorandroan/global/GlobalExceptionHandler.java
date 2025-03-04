@@ -40,7 +40,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                                                                    HttpHeaders headers, HttpStatusCode status,
                                                                    WebRequest request) {
 
-        log.warn("handleMethodArgumentNotValidException : {}", e.getMessage());
+        log.warn("handleMethodArgumentNotValidException : {}", "Invalid Arguments");
         List<String> errList = e.getBindingResult().getFieldErrors().stream()
                 .map(DefaultMessageSourceResolvable::getDefaultMessage)
                 .toList();
@@ -56,10 +56,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     private ResponseEntity<Object> handleExceptionInternal(ErrorCode errorCode) {
-        List<String> list = new ArrayList<>();
-        list.add(errorCode.getMessage());
         return ResponseEntity.status(errorCode.getStatus())
-                .body(makeResponse(errorCode, list));
+                .body(makeResponse(errorCode, List.of(errorCode.getMessage())));
     }
 
     private ErrorResponse makeResponse(ErrorCode errorCode, List<String> errList) {
