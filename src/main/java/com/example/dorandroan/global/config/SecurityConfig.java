@@ -52,7 +52,7 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(
                         auth -> auth
-                                .requestMatchers("/", "/health", "/member/signup", "/member/nickname").permitAll()
+                                .requestMatchers("/", "/health", "/member/signup", "/member/nickname", "/member/auth/*").permitAll()
                                 .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(new JwtAuthFilter(customUserDetailsService, jwtUtil), CustomAuthFilter.class)
