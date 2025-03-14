@@ -1,5 +1,6 @@
 package com.example.dorandroan.global.config;
 
+import com.example.dorandroan.global.CookieUtil;
 import com.example.dorandroan.global.jwt.*;
 import com.example.dorandroan.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,7 @@ import java.util.List;
 public class SecurityConfig {
 
     private final JwtUtil jwtUtil;
+    private final CookieUtil cookieUtil;
     private final MemberRepository memberRepository;
     private final CustomUserDetailsService customUserDetailsService;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
@@ -54,7 +56,7 @@ public class SecurityConfig {
                                 .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(new JwtAuthFilter(customUserDetailsService, jwtUtil), CustomAuthFilter.class)
-                .addFilterAt(new CustomAuthFilter(authenticationManager(authenticationConfiguration), jwtUtil, memberRepository), UsernamePasswordAuthenticationFilter.class)
+                .addFilterAt(new CustomAuthFilter(authenticationManager(authenticationConfiguration), jwtUtil, memberRepository, cookieUtil), UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(excep -> excep.authenticationEntryPoint(customAuthenticationEntryPoint).accessDeniedHandler(customAccessDeniedHandler))
                 .build();
 
