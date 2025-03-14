@@ -44,6 +44,7 @@ public class Member {
     private Boolean push;
 
     @Column
+    @Enumerated(EnumType.STRING)
     private Role role;
 
     public void publishToken(String refreshToken) {

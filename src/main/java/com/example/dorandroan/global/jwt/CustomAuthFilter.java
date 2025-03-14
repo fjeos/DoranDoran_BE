@@ -3,6 +3,7 @@ package com.example.dorandroan.global.jwt;
 import com.example.dorandroan.dto.MemberLoginRequestDto;
 import com.example.dorandroan.dto.MemberLoginResponseDto;
 import com.example.dorandroan.entity.Member;
+import com.example.dorandroan.global.CookieUtil;
 import com.example.dorandroan.repository.MemberRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -26,11 +27,13 @@ public class CustomAuthFilter extends UsernamePasswordAuthenticationFilter {
     private final AuthenticationManager authenticationManager;
     private final MemberRepository memberRepository;
     private final JwtUtil jwtUtil;
+    private final CookieUtil cookieUtil;
 
-    public CustomAuthFilter(AuthenticationManager authenticationManager, JwtUtil jwtUtil, MemberRepository memberRepository) {
+    public CustomAuthFilter(AuthenticationManager authenticationManager, JwtUtil jwtUtil, MemberRepository memberRepository, CookieUtil cookieUtil) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
         this.memberRepository = memberRepository;
+        this.cookieUtil = cookieUtil;
         setRequiresAuthenticationRequestMatcher(new AntPathRequestMatcher("/member/login", "POST"));
     }
 
@@ -63,13 +66,13 @@ public class CustomAuthFilter extends UsernamePasswordAuthenticationFilter {
         member.publishToken(refreshToken);
         memberRepository.save(member);
 
+        cookieUtil.setTokenCookies(response, accessToken, refreshToken);
+
         response.setContentType("application/json;charset=UTF-8");
         response.setStatus(HttpServletResponse.SC_OK);
 
         ObjectMapper objectMapper = new ObjectMapper();
-
-        ObjectNode rootNode = objectMapper.valueToTree(MemberLoginResponseDto.toDto(member, accessToken));
-
+        ObjectNode rootNode = objectMapper.valueToTree(MemberLoginResponseDto.toDto(member));
         objectMapper.writeValue(response.getWriter(), rootNode);
     }
 

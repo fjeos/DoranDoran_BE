@@ -14,13 +14,12 @@ public class MemberLoginResponseDto {
 
     private String profileImage;
 
-    private String accessToken;
 
-    public static MemberLoginResponseDto toDto(Member member, String accessToken) {
+    public static MemberLoginResponseDto toDto(Member member) {
         return MemberLoginResponseDto.builder()
                 .memberId(member.getMemberId())
                 .nickname(member.getNickname())
                 .profileImage(member.getProfileImg())
-                .accessToken(accessToken).build();
+                .build();
     }
 }
