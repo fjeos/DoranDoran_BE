@@ -7,6 +7,10 @@ spring:
     url: ${DB_URL}
     username: ${DB_USER}
     password: ${DB_PW}
+  data:
+    redis:
+      host: ${REDIS_URL}
+      port: 3306
   jpa:
     hibernate:
       ddl-auto: update
@@ -16,6 +20,24 @@ spring:
         show-sql: true
   cors:
     allowed-origin: ${CORS_ORIGIN}
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${SERVER_EMAIL}
+    password: ${EMAIL_PW}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connection-timeout: 5000
+          timeout: 5000
+          write-timeout: 5000
+        expiration: 3600000
+
+
 jwt:
   access:
     secret: ${JWT_ACCESS_KEY}
