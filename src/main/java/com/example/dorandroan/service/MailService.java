@@ -1,6 +1,7 @@
 package com.example.dorandroan.service;
 
 import com.example.dorandroan.dto.EmailAuthRequestDto;
+import com.example.dorandroan.entity.AuthCode;
 import com.example.dorandroan.global.RestApiException;
 import com.example.dorandroan.global.error.MemberErrorCode;
 import jakarta.mail.internet.MimeMessage;
@@ -22,7 +23,7 @@ public class MailService {
     private String serverEmail;
     private final JavaMailSender javaMailSender;
     private final MemberRegistrationService memberRegistrationService;
-    //private final MailRepository mailRepository;
+    private final RedisService redisService;
 
     public void sendEmail(EmailAuthRequestDto requestDto) throws MessagingException {
         String receiver = requestDto.getEmail();
@@ -37,13 +38,13 @@ public class MailService {
         sendSimpleMessage(receiver);
     }
 
-    public String createNumber() {
+    public Integer createNumber() {
         SecureRandom secureRandom = new SecureRandom();
         int randomNumber = secureRandom.nextInt(1000000);
-        return String.format("%06d", randomNumber);
+        return Integer.parseInt(String.format("%06d", randomNumber));
     }
 
-    public MimeMessage createMail(String mail, String number) throws MessagingException {
+    public MimeMessage createMail(String mail, Integer number) throws MessagingException {
         MimeMessage message = javaMailSender.createMimeMessage();
 
         message.setFrom(serverEmail);
@@ -59,7 +60,7 @@ public class MailService {
     }
 
     public void sendSimpleMessage(String receiverEmail) throws MessagingException {
-        String authCode = createNumber();
+        Integer authCode = createNumber();
 
         MimeMessage message = createMail(receiverEmail, authCode);
         try {
@@ -67,10 +68,11 @@ public class MailService {
         } catch (MailException e) {
             throw new RestApiException(MemberErrorCode.MAIL_ERROR);
         }
-        // TODO 인증코드 저장
+        redisService.saveCode(receiverEmail, authCode);
     }
 
     public void authCode(Map<String, Integer> authCode) {
+        AuthCode foundCode = redisService.findEmailAndCode(authCode);
 
     }
 }

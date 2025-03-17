@@ -10,7 +10,7 @@ spring:
   data:
     redis:
       host: ${REDIS_URL}
-      port: 3306
+      port: ${REDIS_PORT}
   jpa:
     hibernate:
       ddl-auto: update
