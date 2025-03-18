@@ -1,17 +1,13 @@
 package com.example.dorandroan.entity;
 
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
 
 import java.io.Serializable;
 
-@Entity
+@Getter
 @Builder
 @RedisHash(value = "code", timeToLive = 3600)
 @AllArgsConstructor
@@ -19,7 +15,7 @@ import java.io.Serializable;
 public class AuthCode implements Serializable {
 
     @Id
-    private String email;
+    private String clientCode;
 
-    private Integer code;
+    private Integer authCode;
 }

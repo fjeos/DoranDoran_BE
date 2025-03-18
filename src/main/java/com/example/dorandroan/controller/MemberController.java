@@ -1,5 +1,7 @@
 package com.example.dorandroan.controller;
 
+import com.example.dorandroan.dto.CodeAuthRequestDto;
+import com.example.dorandroan.dto.ClientCodeResponseDto;
 import com.example.dorandroan.dto.EmailAuthRequestDto;
 import com.example.dorandroan.dto.SignUpRequestDto;
 import com.example.dorandroan.global.jwt.CustomUserDetails;
@@ -13,8 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -43,14 +43,13 @@ public class MemberController {
     }
 
     @PostMapping("/auth/email")
-    public ResponseEntity<Void> sendEmail(@RequestBody EmailAuthRequestDto requestDto) throws MessagingException {
-        mailService.sendEmail(requestDto);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<ClientCodeResponseDto> sendEmail(@Valid @RequestBody EmailAuthRequestDto requestDto) throws MessagingException {
+        return ResponseEntity.ok(mailService.sendEmail(requestDto));
     }
 
     @PostMapping("/auth/code")
-    public ResponseEntity<Void> authCode(@RequestBody Map<String, Integer> authCode) {
-        mailService.authCode(authCode);
+    public ResponseEntity<Void> authCode(@RequestBody CodeAuthRequestDto authCode) {
+        mailService.confirmCode(authCode);
         return ResponseEntity.ok().build();
     }
 }

@@ -9,9 +9,6 @@ import com.example.dorandroan.repository.RefreshRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
-import java.util.Optional;
-
 @Service
 @RequiredArgsConstructor
 public class RedisService {
@@ -20,13 +17,12 @@ public class RedisService {
     private final AuthCodeRepository authCodeRepository;
 
 
-    public void saveCode(String receiverEmail, Integer authCode) {
-        authCodeRepository.save(AuthCode.builder().email(receiverEmail).code(authCode).build());
+    public void saveCode(String clientCode, Integer authCode) {
+        authCodeRepository.save(AuthCode.builder().clientCode(clientCode).authCode(authCode).build());
     }
 
-    public AuthCode findEmailAndCode(Map<String, Integer> authCode) {
-        return authCodeRepository.findById(authCode.get("authCode"))
-                .orElseThrow(() -> new RestApiException(MailAuthErrorCode.CANNOT_FOUND_CODE));
-
+    public AuthCode findByClientCode(String clientCode) {
+        return authCodeRepository.findByClientCode(clientCode)
+                .orElseThrow(() -> new RestApiException(MailAuthErrorCode.CANNOT_FOUND_CLIENT));
     }
 }

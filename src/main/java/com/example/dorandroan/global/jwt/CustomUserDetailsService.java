@@ -1,6 +1,5 @@
 package com.example.dorandroan.global.jwt;
 
-import com.example.dorandroan.entity.Member;
 import com.example.dorandroan.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
