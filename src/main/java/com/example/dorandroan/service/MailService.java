@@ -1,8 +1,11 @@
 package com.example.dorandroan.service;
 
+import com.example.dorandroan.dto.ClientCodeResponseDto;
+import com.example.dorandroan.dto.CodeAuthRequestDto;
 import com.example.dorandroan.dto.EmailAuthRequestDto;
 import com.example.dorandroan.entity.AuthCode;
 import com.example.dorandroan.global.RestApiException;
+import com.example.dorandroan.global.error.MailAuthErrorCode;
 import com.example.dorandroan.global.error.MemberErrorCode;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +16,7 @@ import jakarta.mail.MessagingException;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
-import java.util.Map;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -25,23 +28,35 @@ public class MailService {
     private final MemberRegistrationService memberRegistrationService;
     private final RedisService redisService;
 
-    public void sendEmail(EmailAuthRequestDto requestDto) throws MessagingException {
+    public ClientCodeResponseDto sendEmail(EmailAuthRequestDto requestDto) throws MessagingException {
         String receiver = requestDto.getEmail();
         boolean findUser = memberRegistrationService.findByEmail(receiver);
-        if (requestDto.isSignUp()) {
-            if (findUser)
+        System.out.println("find USEr" + findUser);
+        System.out.println(receiver);
+        System.out.println("DTO 값:  " + requestDto.getIsSignUp());
+        if (requestDto.getIsSignUp()) {
+            System.out.println("===여기===");
+            if (findUser) {
+                System.out.println("=====여기2====");
                 throw new RestApiException(MemberErrorCode.DUPLICATED_EMAIL);
+            }
         } else {
-            if (!findUser)
+            if (!findUser) {
+                System.out.println("====durl3===");
                 throw new RestApiException(MemberErrorCode.USER_NOT_FOUND);
+            }
         }
-        sendSimpleMessage(receiver);
+        return ClientCodeResponseDto.builder().clientCode(sendSimpleMessage(receiver)).build();
     }
 
-    public Integer createNumber() {
+    private Integer createNumber() {
         SecureRandom secureRandom = new SecureRandom();
         int randomNumber = secureRandom.nextInt(1000000);
         return Integer.parseInt(String.format("%06d", randomNumber));
+    }
+
+    public String createClientNumber(String receiverEmail) {
+        return UUID.nameUUIDFromBytes(receiverEmail.getBytes()).toString();
     }
 
     public MimeMessage createMail(String mail, Integer number) throws MessagingException {
@@ -59,7 +74,7 @@ public class MailService {
         return message;
     }
 
-    public void sendSimpleMessage(String receiverEmail) throws MessagingException {
+    public String sendSimpleMessage(String receiverEmail) throws MessagingException {
         Integer authCode = createNumber();
 
         MimeMessage message = createMail(receiverEmail, authCode);
@@ -68,11 +83,15 @@ public class MailService {
         } catch (MailException e) {
             throw new RestApiException(MemberErrorCode.MAIL_ERROR);
         }
-        redisService.saveCode(receiverEmail, authCode);
+        String clientNumber = createClientNumber(receiverEmail);
+        redisService.saveCode(clientNumber, authCode);
+        return clientNumber;
     }
 
-    public void authCode(Map<String, Integer> authCode) {
-        AuthCode foundCode = redisService.findEmailAndCode(authCode);
-
+    public void confirmCode(CodeAuthRequestDto requestDto) {
+        AuthCode foundCode = redisService.findByClientCode(requestDto.getClientCode());
+        if (!foundCode.getAuthCode().equals(requestDto.getAuthCode())) {
+            throw new RestApiException(MailAuthErrorCode.CODE_UNMATCHED);
+        }
     }
 }
