@@ -35,7 +35,6 @@ public class MemberRegistrationService {
                 .profileImg(null)
                 .state(true)
                 .recommends(true)
-                .refreshToken(null)
                 .deviceToken(null)
                 .role(Role.USER)
                 .build());
@@ -60,7 +59,7 @@ public class MemberRegistrationService {
             }
         }
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new RestApiException(MemberErrorCode.USER_NOT_FOUND));
-        member.deleteRefreshToken();
+
     }
 
     private boolean findByNickname(String nickname) {

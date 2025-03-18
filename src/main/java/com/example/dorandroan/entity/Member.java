@@ -35,9 +35,6 @@ public class Member {
     private Boolean recommends;
 
     @Column
-    private String refreshToken;
-
-    @Column
     private String deviceToken;
 
     @Column
@@ -47,11 +44,4 @@ public class Member {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    public void publishToken(String refreshToken) {
-        this.refreshToken = refreshToken;
-    }
-
-    public void deleteRefreshToken() {
-        this.refreshToken = null;
-    }
 }
