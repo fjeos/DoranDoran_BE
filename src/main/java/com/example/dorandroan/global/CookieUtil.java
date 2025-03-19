@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 
 @Component
 public class CookieUtil {
@@ -24,15 +25,7 @@ public class CookieUtil {
     public void setTokenCookies(HttpServletRequest request, HttpServletResponse response,
                                 String accessToken, String refreshToken) {
         String host = request.getHeader("Host");
-        String domain = null;
-
-        if (host != null) {
-            if (host.contains(".dorandoran.online")) {
-                domain = ".dorandoran.online";
-            }
-        }
-        System.out.println(domain);
-        System.out.println(host);
+        String domain = (host != null && host.contains(".dorandoran.online"))? ".dorandoran.online" : null;
 
         ResponseCookie.ResponseCookieBuilder accessTokenCookie = ResponseCookie.from("access", accessToken)
                 .httpOnly(true)
@@ -47,26 +40,12 @@ public class CookieUtil {
             accessTokenCookie.domain(domain);
             refreshTokenCookie.domain(domain);
             accessTokenCookie.secure(true);
-            accessTokenCookie.sameSite("None");
             refreshTokenCookie.secure(true);
-            refreshTokenCookie.sameSite("None");
         }
+        accessTokenCookie.sameSite("None");
+        refreshTokenCookie.sameSite("None");
 
-
-//        Cookie accessTokenCookie = new Cookie("access", accessToken);
-//        accessTokenCookie.setHttpOnly(true);
-//        accessTokenCookie.setSecure(true);
-//        accessTokenCookie.setPath("/");
-//        accessTokenCookie.setMaxAge((int)(accessExp / 1000));  // 30분
-//
-//        Cookie refreshTokenCookie = new Cookie("refresh", refreshToken);
-//        refreshTokenCookie.setHttpOnly(true);
-//        refreshTokenCookie.setSecure(true);
-//        refreshTokenCookie.setPath("/");
-//        refreshTokenCookie.setMaxAge((int)(refreshExp / 1000));  // 7일
         response.addHeader(HttpHeaders.SET_COOKIE, accessTokenCookie.build().toString());
         response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.build().toString());
-//        response.addCookie(accessTokenCookie);
-//        response.addCookie(refreshTokenCookie);
     }
 }
