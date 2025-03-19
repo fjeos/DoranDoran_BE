@@ -8,6 +8,7 @@ import com.example.dorandroan.repository.MemberRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import jakarta.servlet.FilterChain;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +21,7 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.util.Enumeration;
 
 @Slf4j
 public class CustomAuthFilter extends UsernamePasswordAuthenticationFilter {
@@ -63,7 +65,8 @@ public class CustomAuthFilter extends UsernamePasswordAuthenticationFilter {
         String accessToken = jwtUtil.createAccessToken(member.getMemberId(), member.getRole().toString());
         String refreshToken = jwtUtil.createRefreshToken(member.getMemberId(), member.getRole().toString());
 
-        System.out.println(request.getHeader("Origin"));
+        System.out.println("Origin: " +request.getHeader("Origin"));
+        printHeaders(request);
         cookieUtil.setTokenCookies(request, response, accessToken, refreshToken);
 
         response.setContentType("application/json;charset=UTF-8");
@@ -72,6 +75,54 @@ public class CustomAuthFilter extends UsernamePasswordAuthenticationFilter {
         ObjectMapper objectMapper = new ObjectMapper();
         ObjectNode rootNode = objectMapper.valueToTree(MemberLoginResponseDto.toDto(member));
         objectMapper.writeValue(response.getWriter(), rootNode);
+    }
+
+    private void printHeaders(HttpServletRequest request){
+        System.out.println("Request Method: " + request.getMethod());
+
+        // 2. 요청 URI
+        System.out.println("Request URI: " + request.getRequestURI());
+
+        // 3. 요청 URL
+        System.out.println("Request URL: " + request.getRequestURL());
+
+        // 4. 쿼리 파라미터 출력
+        System.out.println("Query Parameters: ");
+        Enumeration<String> paramNames = request.getParameterNames();
+        while (paramNames.hasMoreElements()) {
+            String paramName = paramNames.nextElement();
+            String[] paramValues = request.getParameterValues(paramName);
+            for (String value : paramValues) {
+                System.out.println(paramName + " = " + value);
+            }
+        }
+
+        // 5. 요청 헤더 출력
+        System.out.println("Request Headers: ");
+        Enumeration<String> headerNames = request.getHeaderNames();
+        while (headerNames.hasMoreElements()) {
+            String headerName = headerNames.nextElement();
+            String headerValue = request.getHeader(headerName);
+            System.out.println(headerName + " = " + headerValue);
+        }
+
+        // 6. 요청 속성 출력
+        System.out.println("Request Attributes: ");
+        Enumeration<String> attributeNames = request.getAttributeNames();
+        while (attributeNames.hasMoreElements()) {
+            String attributeName = attributeNames.nextElement();
+            Object attributeValue = request.getAttribute(attributeName);
+            System.out.println(attributeName + " = " + attributeValue);
+        }
+
+        // 7. 쿠키 출력
+        System.out.println("Cookies: ");
+        if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                System.out.println("Cookie: " + cookie.getName() + " = " + cookie.getValue());
+            }
+        }
+
     }
 
 }
