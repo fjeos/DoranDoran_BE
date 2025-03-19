@@ -65,7 +65,6 @@ public class CustomAuthFilter extends UsernamePasswordAuthenticationFilter {
         String accessToken = jwtUtil.createAccessToken(member.getMemberId(), member.getRole().toString());
         String refreshToken = jwtUtil.createRefreshToken(member.getMemberId(), member.getRole().toString());
 
-        System.out.println("Origin: " +request.getHeader("Origin"));
         System.out.println("I will Call the print Method");
         printHeaders(request);
         System.out.println("Calling End. I will Call the Cookie Setting method");
