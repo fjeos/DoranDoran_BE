@@ -23,19 +23,16 @@ public class CookieUtil {
 
     public void setTokenCookies(HttpServletRequest request, HttpServletResponse response,
                                 String accessToken, String refreshToken) {
-        String origin = request.getHeader("Origin");
-        System.out.println(request.getHeader("Origin"));
+        String host = request.getHeader("Host");
         String domain = null;
 
-        if (origin != null) {
-            try {
-                URL url = new URL(origin);
-                domain = "." + url.getHost();
-                System.out.println("Try TRY try domain" + domain);
-            } catch (MalformedURLException e) {
-                throw new RestApiException(CommonErrorCode.INVALID_PARAMETER);
+        if (host != null) {
+            if (host.contains(".dorandoran.online")) {
+                domain = ".dorandoran.online";
             }
         }
+        System.out.println(domain);
+        System.out.println(host);
 
         ResponseCookie.ResponseCookieBuilder accessTokenCookie = ResponseCookie.from("access", accessToken)
                 .httpOnly(true)
@@ -46,12 +43,9 @@ public class CookieUtil {
                 .path("/")
                 .maxAge((int) (refreshExp / 1000));
 
-        if (domain != null && !domain.equals("localhost")) {
+        if (domain != null) {
             accessTokenCookie.domain(domain);
             refreshTokenCookie.domain(domain);
-        }
-
-        if (origin != null && origin.startsWith("https")) {
             accessTokenCookie.secure(true);
             accessTokenCookie.sameSite("None");
             refreshTokenCookie.secure(true);

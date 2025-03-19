@@ -31,18 +31,12 @@ public class MailService {
     public ClientCodeResponseDto sendEmail(EmailAuthRequestDto requestDto) throws MessagingException {
         String receiver = requestDto.getEmail();
         boolean findUser = memberRegistrationService.findByEmail(receiver);
-        System.out.println("find USEr" + findUser);
-        System.out.println(receiver);
-        System.out.println("DTO 값:  " + requestDto.getIsSignUp());
         if (requestDto.getIsSignUp()) {
-            System.out.println("===여기===");
             if (findUser) {
-                System.out.println("=====여기2====");
                 throw new RestApiException(MemberErrorCode.DUPLICATED_EMAIL);
             }
         } else {
             if (!findUser) {
-                System.out.println("====durl3===");
                 throw new RestApiException(MemberErrorCode.USER_NOT_FOUND);
             }
         }
