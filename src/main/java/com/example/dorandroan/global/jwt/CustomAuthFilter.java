@@ -63,6 +63,7 @@ public class CustomAuthFilter extends UsernamePasswordAuthenticationFilter {
         String accessToken = jwtUtil.createAccessToken(member.getMemberId(), member.getRole().toString());
         String refreshToken = jwtUtil.createRefreshToken(member.getMemberId(), member.getRole().toString());
 
+        System.out.println(request.getHeader("Origin"));
         cookieUtil.setTokenCookies(request, response, accessToken, refreshToken);
 
         response.setContentType("application/json;charset=UTF-8");
