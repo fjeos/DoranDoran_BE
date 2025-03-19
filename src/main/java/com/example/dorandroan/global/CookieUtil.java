@@ -25,9 +25,9 @@ public class CookieUtil {
                                 String accessToken, String refreshToken) {
         String origin = request.getHeader("Origin");
         System.out.println(request.getHeader("Origin"));
-        String domain = "https://www.dorandoran.online";
+        String domain = null;
 
-        /*if (origin != null) {
+        if (origin != null) {
             try {
                 URL url = new URL(origin);
                 domain = url.getHost();
@@ -35,29 +35,31 @@ public class CookieUtil {
             } catch (MalformedURLException e) {
                 throw new RestApiException(CommonErrorCode.INVALID_PARAMETER);
             }
-        }*/
+        }
 
         ResponseCookie.ResponseCookieBuilder accessTokenCookie = ResponseCookie.from("access", accessToken)
                 .httpOnly(true)
                 .path("/")
-                .maxAge((int)(accessExp / 1000));
+                .maxAge((int) (accessExp / 1000));
         ResponseCookie.ResponseCookieBuilder refreshTokenCookie = ResponseCookie.from("refresh", refreshToken)
                 .httpOnly(true)
                 .path("/")
-                .maxAge((int)(refreshExp / 1000));
+                .maxAge((int) (refreshExp / 1000));
 
-       // if (domain != null && !domain.equals("localhost")) {
-        System.out.println("=============There is Domain : " + domain + "=================");
-        accessTokenCookie.domain(domain);
-        refreshTokenCookie.domain(domain);
-        //} else {
-        System.out.println("OHohOHhohohOH There is no domain~~~~~~");
-        //}
+        if (domain != null && !domain.equals("localhost")) {
+            System.out.println("=============There is Domain : " + domain + "=================");
+            accessTokenCookie.domain(domain);
+            refreshTokenCookie.domain(domain);
+        } else {
+            System.out.println("OHohOHhohohOH There is no domain~~~~~~");
+        }
 
-        //if (origin != null && origin.startsWith("https")) {
-        accessTokenCookie.secure(true);
-        refreshTokenCookie.secure(true);
-        //}
+        if (origin != null && origin.startsWith("https")) {
+            accessTokenCookie.secure(true);
+            accessTokenCookie.sameSite("None");
+            refreshTokenCookie.secure(true);
+            refreshTokenCookie.sameSite("None");
+        }
 
 
 //        Cookie accessTokenCookie = new Cookie("access", accessToken);
