@@ -24,12 +24,14 @@ public class CookieUtil {
     public void setTokenCookies(HttpServletRequest request, HttpServletResponse response,
                                 String accessToken, String refreshToken) {
         String origin = request.getHeader("Origin");
+        System.out.println(request.getHeader("Origin"));
         String domain = null;
 
         if (origin != null) {
             try {
                 URL url = new URL(origin);
                 domain = url.getHost();
+                System.out.println("Try TRY try domain" + domain);
             } catch (MalformedURLException e) {
                 throw new RestApiException(CommonErrorCode.INVALID_PARAMETER);
             }
