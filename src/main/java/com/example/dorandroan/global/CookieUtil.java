@@ -24,9 +24,12 @@ public class CookieUtil {
 
     public void setTokenCookies(HttpServletRequest request, HttpServletResponse response,
                                 String accessToken, String refreshToken) {
-        String host = request.getHeader("Host");
+        String host = request.getHeader("X-Forwarded-Host");
+        if (host == null) host = request.getHeader("Host");
         String domain = (host != null && host.contains(".dorandoran.online"))? ".dorandoran.online" : null;
 
+        System.out.println(host);
+        System.out.println(domain);
         ResponseCookie.ResponseCookieBuilder accessTokenCookie = ResponseCookie.from("access", accessToken)
                 .httpOnly(true)
                 .path("/")
