@@ -30,7 +30,7 @@ public class CookieUtil {
         if (origin != null) {
             try {
                 URL url = new URL(origin);
-                domain = url.getHost();
+                domain = "." + url.getHost();
                 System.out.println("Try TRY try domain" + domain);
             } catch (MalformedURLException e) {
                 throw new RestApiException(CommonErrorCode.INVALID_PARAMETER);
@@ -47,11 +47,8 @@ public class CookieUtil {
                 .maxAge((int) (refreshExp / 1000));
 
         if (domain != null && !domain.equals("localhost")) {
-            System.out.println("=============There is Domain : " + domain + "=================");
             accessTokenCookie.domain(domain);
             refreshTokenCookie.domain(domain);
-        } else {
-            System.out.println("OHohOHhohohOH There is no domain~~~~~~");
         }
 
         if (origin != null && origin.startsWith("https")) {
