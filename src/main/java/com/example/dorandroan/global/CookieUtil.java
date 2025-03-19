@@ -45,8 +45,11 @@ public class CookieUtil {
                 .maxAge((int)(refreshExp / 1000));
 
         if (domain != null && !domain.equals("localhost")) {
+            System.out.println("=============There is Domain : " + domain + "=================");
             accessTokenCookie.domain(domain);
             refreshTokenCookie.domain(domain);
+        } else {
+            System.out.println("OHohOHhohohOH There is no domain~~~~~~");
         }
 
         if (origin != null && origin.startsWith("https")) {
