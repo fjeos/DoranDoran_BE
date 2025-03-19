@@ -66,7 +66,9 @@ public class CustomAuthFilter extends UsernamePasswordAuthenticationFilter {
         String refreshToken = jwtUtil.createRefreshToken(member.getMemberId(), member.getRole().toString());
 
         System.out.println("Origin: " +request.getHeader("Origin"));
+        System.out.println("I will Call the print Method");
         printHeaders(request);
+        System.out.println("Calling End. I will Call the Cookie Setting method");
         cookieUtil.setTokenCookies(request, response, accessToken, refreshToken);
 
         response.setContentType("application/json;charset=UTF-8");
@@ -78,6 +80,7 @@ public class CustomAuthFilter extends UsernamePasswordAuthenticationFilter {
     }
 
     private void printHeaders(HttpServletRequest request){
+        System.out.println("In the Print Method First");
         System.out.println("Request Method: " + request.getMethod());
 
         // 2. 요청 URI
