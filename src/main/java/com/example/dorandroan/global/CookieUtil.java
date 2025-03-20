@@ -28,8 +28,6 @@ public class CookieUtil {
         if (host == null) host = request.getHeader("Host");
         String domain = (host != null && host.contains(".dorandoran.online"))? ".dorandoran.online" : null;
 
-        System.out.println(host);
-        System.out.println(domain);
         ResponseCookie.ResponseCookieBuilder accessTokenCookie = ResponseCookie.from("access", accessToken)
                 .httpOnly(true)
                 .path("/")
