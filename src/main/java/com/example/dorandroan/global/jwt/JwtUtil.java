@@ -4,10 +4,12 @@ import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import java.security.Key;
 import java.sql.Date;
@@ -21,6 +23,9 @@ public class JwtUtil {
     private Key refreshKey;
     private long accessExpTime;
     private long refreshExpTime;
+
+    public static final String AUTHORIZATION_HEADER = "Authorization";
+    public static final String BEARER_PREFIX = "Bearer ";
 
     @PostConstruct
     private void initKeys() {
@@ -106,5 +111,14 @@ public class JwtUtil {
         } catch (ExpiredJwtException e) {
             return e.getClaims();
         }
+    }
+
+    public String getJwtFromHeader(HttpServletRequest request) {
+
+        String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
+        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_PREFIX)) {
+            return bearerToken.substring(7);
+        }
+        return null;
     }
 }
