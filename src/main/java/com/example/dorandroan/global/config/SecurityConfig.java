@@ -3,6 +3,7 @@ package com.example.dorandroan.global.config;
 import com.example.dorandroan.global.CookieUtil;
 import com.example.dorandroan.global.jwt.*;
 import com.example.dorandroan.repository.MemberRepository;
+import com.example.dorandroan.service.RedisService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -29,6 +30,7 @@ public class SecurityConfig {
 
     private final JwtUtil jwtUtil;
     private final CookieUtil cookieUtil;
+    private final RedisService redisService;
     private final MemberRepository memberRepository;
     private final CustomUserDetailsService customUserDetailsService;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
@@ -59,7 +61,7 @@ public class SecurityConfig {
                                 .requestMatchers("/", "/health", "/member/signup", "/member/nickname", "/member/auth/*").permitAll()
                                 .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(new JwtAuthFilter(customUserDetailsService, jwtUtil), CustomAuthFilter.class)
+                .addFilterBefore(new JwtAuthFilter(customUserDetailsService, redisService, jwtUtil), CustomAuthFilter.class)
                 .addFilterAt(new CustomAuthFilter(authenticationManager(authenticationConfiguration), jwtUtil, memberRepository, cookieUtil), UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(excep -> excep.authenticationEntryPoint(customAuthenticationEntryPoint).accessDeniedHandler(customAccessDeniedHandler))
                 .build();

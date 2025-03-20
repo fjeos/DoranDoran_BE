@@ -8,6 +8,7 @@ import com.example.dorandroan.global.jwt.CustomUserDetails;
 import com.example.dorandroan.service.MailService;
 import com.example.dorandroan.service.MemberRegistrationService;
 import jakarta.mail.MessagingException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Enumeration;
 
 @RestController
 @RequiredArgsConstructor
@@ -50,6 +53,12 @@ public class MemberController {
     @PostMapping("/auth/code")
     public ResponseEntity<Void> authCode(@RequestBody CodeAuthRequestDto authCode) {
         mailService.confirmCode(authCode);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/mypage")
+    public ResponseEntity<Void> myPage(HttpServletRequest request) {
+
         return ResponseEntity.ok().build();
     }
 }
