@@ -69,13 +69,6 @@ public class CustomAuthFilter extends UsernamePasswordAuthenticationFilter {
 
         cookieUtil.setTokenCookies(request, response, accessToken, refreshToken);
 
-        Collection<String> headers = response.getHeaders(HttpHeaders.SET_COOKIE);
-        System.out.println("응답 헤더에 설정된 쿠키 개수: " + headers.size());
-
-        int index = 0;
-        for (String cookie : headers) {
-            System.out.println("쿠키 " + index + ": " + cookie);
-        }
         response.setContentType("application/json;charset=UTF-8");
         response.setStatus(HttpServletResponse.SC_OK);
 

@@ -17,5 +17,6 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
         //TODO 비인가 회원 접근 거부
         log.warn("비인가 회원 접근 거부");
+
     }
 }

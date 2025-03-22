@@ -28,22 +28,16 @@ public class CookieUtil {
                                 String accessToken, String refreshToken) {
         String host = request.getHeader("X-Forwarded-Host");
         if (host == null) host = request.getHeader("Host");
-//        String domain = (host != null && host.contains(".dorandoran.online"))? ".dorandoran.online" : null;
 
-        log.info("최종 호스트: {}", host);
-        log.info("X-Forwarded-Host: {}", request.getHeader("X-Forwarded-Host"));
-        log.info("Host: {}", request.getHeader("Host"));
-
-        // 더 유연한 도메인 체크
         String domain = null;
         if (host != null) {
             if (host.contains("dorandoran.online")) {
                 domain = ".dorandoran.online";
             } else if (host.contains("localhost")) {
-                domain = null; // localhost에서는 domain 설정 안함
+                domain = null;
             }
         }
-        log.info("설정된 도메인: {}", domain);
+
         ResponseCookie.ResponseCookieBuilder accessTokenCookie = ResponseCookie.from("access", accessToken)
                 .httpOnly(true)
                 .path("/")
