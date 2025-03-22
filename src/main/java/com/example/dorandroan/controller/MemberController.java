@@ -1,12 +1,10 @@
 package com.example.dorandroan.controller;
 
-import com.example.dorandroan.dto.CodeAuthRequestDto;
-import com.example.dorandroan.dto.ClientCodeResponseDto;
-import com.example.dorandroan.dto.EmailAuthRequestDto;
-import com.example.dorandroan.dto.SignUpRequestDto;
+import com.example.dorandroan.dto.*;
 import com.example.dorandroan.global.jwt.CustomUserDetails;
 import com.example.dorandroan.service.MailService;
 import com.example.dorandroan.service.MemberRegistrationService;
+import com.example.dorandroan.service.MemberService;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,6 +25,7 @@ public class MemberController {
 
     private final MemberRegistrationService memberRegistrationService;
     private final MailService mailService;
+    private final MemberService memberService;
 
     @PostMapping("/signup")
     public ResponseEntity<Void> signUp(@RequestBody @Valid SignUpRequestDto requestDto) {
@@ -56,9 +55,9 @@ public class MemberController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/mypage")
-    public ResponseEntity<Void> myPage() {
-        log.info("mypage");
-        return ResponseEntity.ok().build();
+    @GetMapping("/mypage")
+    public ResponseEntity<MyPageResponseDto> myPage(HttpServletRequest request) {
+
+        return ResponseEntity.ok(memberService.getMyPage(request));
     }
 }

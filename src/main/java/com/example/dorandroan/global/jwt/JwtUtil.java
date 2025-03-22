@@ -121,4 +121,8 @@ public class JwtUtil {
         }
         return null;
     }
+
+    public Long getMemberIdFromJwt(HttpServletRequest request) {
+        return this.getMemberIdFromToken(this.getJwtFromHeader(request), "access");
+    }
 }
