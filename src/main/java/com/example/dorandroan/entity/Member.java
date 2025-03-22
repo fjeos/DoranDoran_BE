@@ -1,6 +1,7 @@
 package com.example.dorandroan.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 @Entity
@@ -37,7 +38,7 @@ public class Member {
     @Column
     private String deviceToken;
 
-    @Column
+    @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
     private Boolean push;
 
     @Column
