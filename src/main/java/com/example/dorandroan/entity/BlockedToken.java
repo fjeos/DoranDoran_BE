@@ -16,7 +16,7 @@ import java.io.Serializable;
 public class BlockedToken implements Serializable {
 
     @Id
-    private Long userId;
+    private Long memberId;
 
     @Indexed
     private String token;

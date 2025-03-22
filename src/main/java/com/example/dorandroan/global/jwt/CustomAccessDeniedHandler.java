@@ -26,6 +26,6 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
                        AccessDeniedException accessDeniedException) throws IOException, ServletException {
         log.error("권한이 없습니다.", accessDeniedException);
         //TODO 이후 처리
-        throw new RestApiException(MemberErrorCode.USER_NOT_FOUND);
+        throw new RestApiException(MemberErrorCode.MEMBER_NOT_FOUND);
     }
 }

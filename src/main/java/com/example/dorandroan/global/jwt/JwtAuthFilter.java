@@ -1,5 +1,6 @@
 package com.example.dorandroan.global.jwt;
 
+import com.example.dorandroan.global.CookieUtil;
 import com.example.dorandroan.global.error.MemberErrorCode;
 import com.example.dorandroan.service.RedisService;
 import io.jsonwebtoken.Claims;
@@ -23,6 +24,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final CustomUserDetailsService customUserDetailsService;
     private final RedisService redisService;
+    private final CookieUtil cookieUtil;
     private final JwtUtil jwtUtil;
 
     private static final String ACCESS_PREFIX = "access";
@@ -30,7 +32,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String token = jwtUtil.getJwtFromHeader(request);
+        String token = cookieUtil.getAccessFromCookie(request);
 
         if (token != null) {
             try {

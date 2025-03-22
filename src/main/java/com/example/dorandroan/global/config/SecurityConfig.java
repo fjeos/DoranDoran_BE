@@ -41,14 +41,6 @@ public class SecurityConfig {
     @Value("${spring.cors.allowed-origin}")
     private final List<String> corsOrigins;
 
-    @PostConstruct
-    public void logCorsOrigins() {
-        System.out.println("✅ Allowed CORS Origins:");
-        for (String corsOrigin : corsOrigins) {
-            System.out.println("   ➤ " + corsOrigin);
-        }
-    }
-
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
         return configuration.getAuthenticationManager();
@@ -67,11 +59,11 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(
                         auth -> auth
-                                .requestMatchers("/", "/health", "/member/signup", "/member/nickname", "/member/auth/*").permitAll()
+                                .requestMatchers("/", "/health", "/member/signup", "/member/nickname", "/member/auth/*", "/member/relogin").permitAll()
                                 .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(new JwtAuthFilter(customUserDetailsService, redisService, jwtUtil), CustomAuthFilter.class)
-                .addFilterAt(new CustomAuthFilter(authenticationManager(authenticationConfiguration), jwtUtil, memberRepository, cookieUtil), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JwtAuthFilter(customUserDetailsService, redisService, cookieUtil, jwtUtil), CustomAuthFilter.class)
+                .addFilterAt(new CustomAuthFilter(authenticationManager(authenticationConfiguration), jwtUtil, redisService, cookieUtil), UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(excep -> excep.authenticationEntryPoint(customAuthenticationEntryPoint).accessDeniedHandler(customAccessDeniedHandler))
                 .build();
 

@@ -19,7 +19,7 @@ public enum MemberErrorCode implements ErrorCode {
     // 403 Forbidden
 
     // 404 Not Found
-    USER_NOT_FOUND(HttpStatus.NOT_FOUND, "회원정보를 찾을 수 없습니다."),
+    MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "회원정보를 찾을 수 없습니다."),
 
     // 500 Internal Server Error
     MAIL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "메일 발송 중 오류가 발생했습니다.");

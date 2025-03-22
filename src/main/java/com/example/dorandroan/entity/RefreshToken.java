@@ -15,7 +15,7 @@ import java.io.Serializable;
 public class RefreshToken implements Serializable {
 
     @Id
-    private Long userId;
+    private Long memberId;
 
     @Indexed
     private String refresh;

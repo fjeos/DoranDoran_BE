@@ -59,4 +59,28 @@ public class CookieUtil {
         response.addHeader(HttpHeaders.SET_COOKIE, accessTokenCookie.build().toString());
         response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.build().toString());
     }
+
+    // Cookie에서 access토큰 가져오기
+    public String getAccessFromCookie(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("access".equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
+        }
+        return null;
+    }
+    public String getRefreshFromCookie(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("refresh".equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
+        }
+        throw new RestApiException(CommonErrorCode.INVALID_PARAMETER);
+    }
 }

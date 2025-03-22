@@ -5,6 +5,7 @@ import com.example.dorandroan.dto.MemberLoginResponseDto;
 import com.example.dorandroan.entity.Member;
 import com.example.dorandroan.global.CookieUtil;
 import com.example.dorandroan.repository.MemberRepository;
+import com.example.dorandroan.service.RedisService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import jakarta.servlet.FilterChain;
@@ -29,14 +30,14 @@ import java.util.Enumeration;
 public class CustomAuthFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationManager authenticationManager;
-    private final MemberRepository memberRepository;
+    private final RedisService redisService;
     private final JwtUtil jwtUtil;
     private final CookieUtil cookieUtil;
 
-    public CustomAuthFilter(AuthenticationManager authenticationManager, JwtUtil jwtUtil, MemberRepository memberRepository, CookieUtil cookieUtil) {
+    public CustomAuthFilter(AuthenticationManager authenticationManager, JwtUtil jwtUtil, RedisService redisService, CookieUtil cookieUtil) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
-        this.memberRepository = memberRepository;
+        this.redisService = redisService;
         this.cookieUtil = cookieUtil;
         setRequiresAuthenticationRequestMatcher(new AntPathRequestMatcher("/member/login", "POST"));
     }
@@ -66,7 +67,7 @@ public class CustomAuthFilter extends UsernamePasswordAuthenticationFilter {
 
         String accessToken = jwtUtil.createAccessToken(member.getMemberId(), member.getRole().toString());
         String refreshToken = jwtUtil.createRefreshToken(member.getMemberId(), member.getRole().toString());
-
+        redisService.saveRefresh(member.getMemberId(), refreshToken);
         cookieUtil.setTokenCookies(request, response, accessToken, refreshToken);
 
         response.setContentType("application/json;charset=UTF-8");

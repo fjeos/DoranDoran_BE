@@ -58,7 +58,7 @@ public class MemberRegistrationService {
                 throw new RestApiException(MemberErrorCode.INVALID_ACCESS_TOKEN);
             }
         }
-        Member member = memberRepository.findById(memberId).orElseThrow(() -> new RestApiException(MemberErrorCode.USER_NOT_FOUND));
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new RestApiException(MemberErrorCode.MEMBER_NOT_FOUND));
 
     }
 
