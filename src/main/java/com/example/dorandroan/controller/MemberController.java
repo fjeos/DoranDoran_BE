@@ -8,6 +8,7 @@ import com.example.dorandroan.service.MemberService;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -55,6 +56,10 @@ public class MemberController {
         return ResponseEntity.ok().build();
     }
 
+    @PostMapping("/relogin")
+    public ResponseEntity<MemberLoginResponseDto> relogin(HttpServletRequest request, HttpServletResponse response) {
+        return ResponseEntity.ok(memberService.relogin(request, response));
+    }
     @GetMapping("/mypage")
     public ResponseEntity<MyPageResponseDto> myPage(HttpServletRequest request) {
 

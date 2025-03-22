@@ -2,6 +2,7 @@ package com.example.dorandroan.service;
 
 import com.example.dorandroan.entity.AuthCode;
 import com.example.dorandroan.entity.BlockedToken;
+import com.example.dorandroan.entity.RefreshToken;
 import com.example.dorandroan.global.RestApiException;
 import com.example.dorandroan.global.error.CommonErrorCode;
 import com.example.dorandroan.global.error.MailAuthErrorCode;
@@ -33,5 +34,9 @@ public class RedisService {
 
     public boolean isTokenBlackListed(String token) {
         return blockedRepository.findByToken(token) != null;
+    }
+
+    public void saveRefresh(Long memberId, String refreshToken) {
+        refreshRepository.save(RefreshToken.builder().memberId(memberId).refresh(refreshToken).build());
     }
 }

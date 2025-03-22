@@ -37,7 +37,7 @@ public class MailService {
             }
         } else {
             if (!findUser) {
-                throw new RestApiException(MemberErrorCode.USER_NOT_FOUND);
+                throw new RestApiException(MemberErrorCode.MEMBER_NOT_FOUND);
             }
         }
         return ClientCodeResponseDto.builder().clientCode(sendSimpleMessage(receiver)).build();

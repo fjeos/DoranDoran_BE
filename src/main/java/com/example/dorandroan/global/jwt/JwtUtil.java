@@ -1,5 +1,6 @@
 package com.example.dorandroan.global.jwt;
 
+import com.example.dorandroan.global.CookieUtil;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -23,9 +24,7 @@ public class JwtUtil {
     private Key refreshKey;
     private long accessExpTime;
     private long refreshExpTime;
-
-    public static final String AUTHORIZATION_HEADER = "Authorization";
-    public static final String BEARER_PREFIX = "Bearer ";
+    private CookieUtil cookieUtil;
 
     @PostConstruct
     private void initKeys() {
@@ -113,16 +112,9 @@ public class JwtUtil {
         }
     }
 
-    public String getJwtFromHeader(HttpServletRequest request) {
-
-        String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
-        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_PREFIX)) {
-            return bearerToken.substring(7);
-        }
-        return null;
-    }
-
-    public Long getMemberIdFromJwt(HttpServletRequest request) {
-        return this.getMemberIdFromToken(this.getJwtFromHeader(request), "access");
+    public Long getMemberIdFromAccessToken(HttpServletRequest request) {
+        String token = cookieUtil.getAccessFromCookie(request);
+        this.validateAccessToken(token);
+        return this.getMemberIdFromToken(token, "access");
     }
 }
