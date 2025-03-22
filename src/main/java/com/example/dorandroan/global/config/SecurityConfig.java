@@ -4,6 +4,7 @@ import com.example.dorandroan.global.CookieUtil;
 import com.example.dorandroan.global.jwt.*;
 import com.example.dorandroan.repository.MemberRepository;
 import com.example.dorandroan.service.RedisService;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -40,6 +41,14 @@ public class SecurityConfig {
     @Value("${spring.cors.allowed-origin}")
     private final List<String> corsOrigins;
 
+    @PostConstruct
+    public void logCorsOrigins() {
+        System.out.println("✅ Allowed CORS Origins:");
+        for (String corsOrigin : corsOrigins) {
+            System.out.println("   ➤ " + corsOrigin);
+        }
+    }
+
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
         return configuration.getAuthenticationManager();
@@ -72,9 +81,6 @@ public class SecurityConfig {
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(corsOrigins);
-        for (String corsOrigin : corsOrigins) {
-            System.out.println(corsOrigin);
-        }
         configuration.setAllowedMethods(
                 List.of("GET", "POST", "OPTIONS", "PUT", "PATCH", "DELETE"));
         configuration.setAllowedHeaders(List.of("*"));
