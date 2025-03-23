@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import java.net.MalformedURLException;
@@ -25,7 +26,7 @@ public class CookieUtil {
     private long refreshExp;
 
     public void setTokenCookies(HttpServletRequest request, HttpServletResponse response,
-                                String accessToken, String refreshToken) {
+                                String accessToken, String refreshToken, boolean isDeletion) {
         String host = request.getHeader("X-Forwarded-Host");
         if (host == null) host = request.getHeader("Host");
 
@@ -40,12 +41,18 @@ public class CookieUtil {
 
         ResponseCookie.ResponseCookieBuilder accessTokenCookie = ResponseCookie.from("access", accessToken)
                 .httpOnly(true)
-                .path("/")
-                .maxAge((int) (accessExp / 1000));
+                .path("/");
         ResponseCookie.ResponseCookieBuilder refreshTokenCookie = ResponseCookie.from("refresh", refreshToken)
                 .httpOnly(true)
-                .path("/")
-                .maxAge((int) (refreshExp / 1000));
+                .path("/");
+
+        if (isDeletion) {
+            accessTokenCookie.maxAge(0);
+            refreshTokenCookie.maxAge(0);
+        } else {
+            accessTokenCookie.maxAge((int) (accessExp / 1000));
+            refreshTokenCookie.maxAge((int) (refreshExp / 1000));
+        }
 
         if (domain != null) {
             accessTokenCookie.domain(domain);
@@ -83,4 +90,5 @@ public class CookieUtil {
         }
         throw new RestApiException(CommonErrorCode.INVALID_PARAMETER);
     }
+
 }

@@ -4,16 +4,12 @@ import com.example.dorandroan.entity.AuthCode;
 import com.example.dorandroan.entity.BlockedToken;
 import com.example.dorandroan.entity.RefreshToken;
 import com.example.dorandroan.global.RestApiException;
-import com.example.dorandroan.global.error.CommonErrorCode;
 import com.example.dorandroan.global.error.MailAuthErrorCode;
-import com.example.dorandroan.global.error.MemberErrorCode;
 import com.example.dorandroan.repository.AuthCodeRepository;
 import com.example.dorandroan.repository.BlockedTokenRepository;
 import com.example.dorandroan.repository.RefreshRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -38,5 +34,13 @@ public class RedisService {
 
     public void saveRefresh(Long memberId, String refreshToken) {
         refreshRepository.save(RefreshToken.builder().memberId(memberId).refresh(refreshToken).build());
+    }
+
+    public void addBlackList(Long memberId, String refresh, String access) {
+
+        blockedRepository.save(BlockedToken.builder().memberId(memberId)
+                .token(refresh).build());
+        blockedRepository.save(BlockedToken.builder().memberId(memberId)
+                .token(access).build());
     }
 }

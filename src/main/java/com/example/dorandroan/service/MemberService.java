@@ -30,7 +30,7 @@ public class MemberService {
             access = jwtUtil.createAccessToken(memberId, "USER");
             redisService.saveRefresh(memberId, refresh);
         }
-        cookieUtil.setTokenCookies(request, response, access, refresh);
+        cookieUtil.setTokenCookies(request, response, access, refresh, false);
 
         return MemberLoginResponseDto.toDto(memberRepository.findById(memberId)
                 .orElseThrow(() -> new RestApiException(MemberErrorCode.MEMBER_NOT_FOUND)));
@@ -41,4 +41,14 @@ public class MemberService {
                 .orElseThrow(() -> new RestApiException(MemberErrorCode.MEMBER_NOT_FOUND)));
     }
 
+    public void logout(HttpServletRequest request, HttpServletResponse response) {
+        String access = cookieUtil.getAccessFromCookie(request);
+        String refresh = cookieUtil.getRefreshFromCookie(request);
+        if (jwtUtil.validateRefreshToken(refresh) && jwtUtil.validateAccessToken(access)){
+            redisService.addBlackList(jwtUtil.getMemberIdFromToken(access, "access"), refresh, access);
+            cookieUtil.setTokenCookies(request, response, access, refresh, true);
+        } else {
+            throw new RestApiException(MemberErrorCode.INVALID_ACCESS_TOKEN);
+        }
+    }
 }
