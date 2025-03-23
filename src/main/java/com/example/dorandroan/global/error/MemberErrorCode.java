@@ -11,7 +11,7 @@ public enum MemberErrorCode implements ErrorCode {
     // 400 Bad Request
     DUPLICATED_NICKNAME(HttpStatus.BAD_REQUEST, "중복된 닉네임입니다."),
     DUPLICATED_EMAIL(HttpStatus.BAD_REQUEST, "이미 가입된 이메일입니다."),
-
+    UNMATCHED_TOKEN(HttpStatus.BAD_REQUEST, "토큰 정보가 일치하지 않습니다."),
 
     // 403 Forbidden
 

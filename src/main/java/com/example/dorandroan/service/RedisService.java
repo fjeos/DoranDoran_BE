@@ -5,6 +5,7 @@ import com.example.dorandroan.entity.BlockedToken;
 import com.example.dorandroan.entity.RefreshToken;
 import com.example.dorandroan.global.RestApiException;
 import com.example.dorandroan.global.error.MailAuthErrorCode;
+import com.example.dorandroan.global.error.MemberErrorCode;
 import com.example.dorandroan.repository.AuthCodeRepository;
 import com.example.dorandroan.repository.BlockedTokenRepository;
 import com.example.dorandroan.repository.RefreshRepository;
@@ -42,5 +43,10 @@ public class RedisService {
                 .token(refresh).build());
         blockedRepository.save(BlockedToken.builder().memberId(memberId)
                 .token(access).build());
+    }
+
+    public Long findByRefreshToken(String refresh) {
+        return refreshRepository.findByRefresh(refresh)
+                .orElseThrow(() -> new RestApiException(MemberErrorCode.MEMBER_NOT_FOUND)).getMemberId();
     }
 }
