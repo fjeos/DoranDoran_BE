@@ -67,6 +67,13 @@ public class MemberController {
         memberService.logout(request, response);
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/reissue")
+    public ResponseEntity<Void> reissue(HttpServletRequest request, HttpServletResponse response) {
+        memberService.reissue(request, response);
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping("/mypage")
     public ResponseEntity<MyPageResponseDto> myPage(HttpServletRequest request) {
 

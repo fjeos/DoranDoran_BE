@@ -52,4 +52,15 @@ public class MemberService {
             throw new RestApiException(TokenErrorCode.INVALID_ACCESS_TOKEN);
         }
     }
+
+    public void reissue(HttpServletRequest request, HttpServletResponse response) {
+        String refresh = cookieUtil.getRefreshFromCookie(request);
+        Long memberId = jwtUtil.getMemberIdFromToken(refresh, "refresh");
+
+        if (jwtUtil.validateRefreshToken(refresh) && memberId.equals(redisService.findByRefreshToken(refresh))) {
+            cookieUtil.setTokenCookies(request, response, jwtUtil.createAccessToken(memberId, "USER"), refresh, false);
+        } else {
+            throw new RestApiException(MemberErrorCode.UNMATCHED_TOKEN);
+        }
+    }
 }
