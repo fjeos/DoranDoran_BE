@@ -2,6 +2,7 @@ package com.example.dorandroan.global.jwt;
 
 import com.example.dorandroan.global.CookieUtil;
 import com.example.dorandroan.global.error.MemberErrorCode;
+import com.example.dorandroan.global.error.TokenErrorCode;
 import com.example.dorandroan.service.RedisService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -52,7 +53,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 log.error("토큰이 만료되었습니다.");
                 response.setStatus(HttpStatus.UNAUTHORIZED.value());
                 response.setContentType("application/json;charset=UTF-8");
-                response.getWriter().write(String.format("{\"message\": \"%s\"}", MemberErrorCode.EXPIRED_ACCESS_TOKEN.getMessage()));
+                response.getWriter().write(String.format("{\"message\": \"%s\"}", TokenErrorCode.EXPIRED_ACCESS_TOKEN.getMessage()));
 
                 return;
             }
