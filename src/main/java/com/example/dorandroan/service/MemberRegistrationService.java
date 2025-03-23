@@ -5,6 +5,7 @@ import com.example.dorandroan.entity.Member;
 import com.example.dorandroan.entity.Role;
 import com.example.dorandroan.global.RestApiException;
 import com.example.dorandroan.global.error.MemberErrorCode;
+import com.example.dorandroan.global.error.TokenErrorCode;
 import com.example.dorandroan.global.jwt.CustomUserDetails;
 import com.example.dorandroan.global.jwt.JwtUtil;
 import com.example.dorandroan.repository.MemberRepository;
@@ -55,7 +56,7 @@ public class MemberRegistrationService {
             if (jwtUtil.validateAccessToken(token)) {
                 memberId = jwtUtil.getMemberIdFromToken(token, "access");
             } else {
-                throw new RestApiException(MemberErrorCode.INVALID_ACCESS_TOKEN);
+                throw new RestApiException(TokenErrorCode.INVALID_ACCESS_TOKEN);
             }
         }
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new RestApiException(MemberErrorCode.MEMBER_NOT_FOUND));

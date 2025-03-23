@@ -1,6 +1,9 @@
 package com.example.dorandroan.global.jwt;
 
 import com.example.dorandroan.global.CookieUtil;
+import com.example.dorandroan.global.RestApiException;
+import com.example.dorandroan.global.error.CommonErrorCode;
+import com.example.dorandroan.global.error.TokenErrorCode;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -84,8 +87,9 @@ public class JwtUtil {
     // JWT 검증
     public boolean validateRefreshToken(String refresh) {
         try {
-            if(!"refresh".equals(parseClaims(refresh, "refresh").get("tokenType", String.class)))
-                throw new IllegalArgumentException("토큰 타입이 유효하지 않습니다.");
+            if(!"refresh".equals(parseClaims(refresh, "refresh").get("tokenType", String.class))) {
+                throw new RestApiException(TokenErrorCode.INVALID_TOKEN_TYPE);
+            }
             return true;
         }catch (SecurityException | MalformedJwtException e) {
             log.info("Invalid JWT Token", e);

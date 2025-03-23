@@ -5,6 +5,7 @@ import com.example.dorandroan.dto.MyPageResponseDto;
 import com.example.dorandroan.global.CookieUtil;
 import com.example.dorandroan.global.RestApiException;
 import com.example.dorandroan.global.error.MemberErrorCode;
+import com.example.dorandroan.global.error.TokenErrorCode;
 import com.example.dorandroan.global.jwt.JwtUtil;
 import com.example.dorandroan.repository.MemberRepository;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,7 +26,7 @@ public class MemberService {
         String refresh = cookieUtil.getRefreshFromCookie(request);
         String access = null;
         Long memberId = jwtUtil.getMemberIdFromToken(refresh, "refresh");
-        if (jwtUtil.validateRefreshToken(refresh)) {
+        if (jwtUtil.validateRefreshToken(refresh) && redisService.isTokenBlackListed(refresh)) {
             refresh = jwtUtil.createRefreshToken(memberId, "USER");
             access = jwtUtil.createAccessToken(memberId, "USER");
             redisService.saveRefresh(memberId, refresh);
@@ -48,7 +49,7 @@ public class MemberService {
             redisService.addBlackList(jwtUtil.getMemberIdFromToken(access, "access"), refresh, access);
             cookieUtil.setTokenCookies(request, response, access, refresh, true);
         } else {
-            throw new RestApiException(MemberErrorCode.INVALID_ACCESS_TOKEN);
+            throw new RestApiException(TokenErrorCode.INVALID_ACCESS_TOKEN);
         }
     }
 }
