@@ -68,7 +68,7 @@ public class CustomAuthFilter extends UsernamePasswordAuthenticationFilter {
         String accessToken = jwtUtil.createAccessToken(member.getMemberId(), member.getRole().toString());
         String refreshToken = jwtUtil.createRefreshToken(member.getMemberId(), member.getRole().toString());
         redisService.saveRefresh(member.getMemberId(), refreshToken);
-        cookieUtil.setTokenCookies(request, response, accessToken, refreshToken);
+        cookieUtil.setTokenCookies(request, response, accessToken, refreshToken, false);
 
         response.setContentType("application/json;charset=UTF-8");
         response.setStatus(HttpServletResponse.SC_OK);

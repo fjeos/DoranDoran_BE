@@ -60,6 +60,13 @@ public class MemberController {
     public ResponseEntity<MemberLoginResponseDto> relogin(HttpServletRequest request, HttpServletResponse response) {
         return ResponseEntity.ok(memberService.relogin(request, response));
     }
+
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(HttpServletRequest request, HttpServletResponse response) {
+        memberService.logout(request, response);
+        return ResponseEntity.ok().build();
+    }
     @GetMapping("/mypage")
     public ResponseEntity<MyPageResponseDto> myPage(HttpServletRequest request) {
 
