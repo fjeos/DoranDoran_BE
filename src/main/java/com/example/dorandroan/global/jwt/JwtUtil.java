@@ -13,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import java.security.Key;
 import java.sql.Date;
@@ -27,7 +26,7 @@ public class JwtUtil {
     private Key refreshKey;
     private long accessExpTime;
     private long refreshExpTime;
-    private CookieUtil cookieUtil;
+    private final CookieUtil cookieUtil;
 
     @PostConstruct
     private void initKeys() {
