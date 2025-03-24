@@ -33,7 +33,6 @@ public class SecurityConfig {
     private final JwtUtil jwtUtil;
     private final CookieUtil cookieUtil;
     private final RedisService redisService;
-    private final MemberRepository memberRepository;
     private final CustomUserDetailsService customUserDetailsService;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
