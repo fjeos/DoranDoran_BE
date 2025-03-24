@@ -26,7 +26,7 @@ public class MemberService {
         String refresh = cookieUtil.getRefreshFromCookie(request);
         String access = null;
         Long memberId = jwtUtil.getMemberIdFromToken(refresh, "refresh");
-        if (jwtUtil.validateRefreshToken(refresh) && redisService.isTokenBlackListed(refresh)) {
+        if (jwtUtil.validateRefreshToken(refresh) && !redisService.isTokenBlackListed(refresh)) {
             refresh = jwtUtil.createRefreshToken(memberId, "USER");
             access = jwtUtil.createAccessToken(memberId, "USER");
             redisService.saveRefresh(memberId, refresh);
