@@ -46,3 +46,11 @@ jwt:
   refresh:
     secret: ${JWT_REFRESH_KEY}
     expiration: ${JWT_REFRESH_EXP}  # 7일
+
+
+cloud:
+  aws:
+    s3:
+      bucket: dorandoran-img
+    region:
+      static: ap-northeast-2
