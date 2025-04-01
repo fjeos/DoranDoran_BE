@@ -30,6 +30,7 @@ public class CookieUtil {
                                 String accessToken, String refreshToken, boolean isDeletion) {
         String host = request.getHeader("X-Forwarded-Host");
         if (host == null) host = request.getHeader("Host");
+        System.out.println("Now host:  " + host);
 
         String domain = null;
         if (host != null) {
@@ -39,6 +40,7 @@ public class CookieUtil {
                 domain = null;
             }
         }
+        System.out.println("Setted Domain:  " + domain);
 
         ResponseCookie.ResponseCookieBuilder accessTokenCookie = ResponseCookie.from("access", accessToken)
                 .httpOnly(true)
