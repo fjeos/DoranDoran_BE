@@ -2,6 +2,7 @@ package com.example.dorandroan.service;
 
 import com.example.dorandroan.dto.MemberLoginResponseDto;
 import com.example.dorandroan.dto.MyPageResponseDto;
+import com.example.dorandroan.entity.Member;
 import com.example.dorandroan.global.CookieUtil;
 import com.example.dorandroan.global.RestApiException;
 import com.example.dorandroan.global.error.MemberErrorCode;
@@ -12,9 +13,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class MemberService {
 
     private final MemberRepository memberRepository;
@@ -22,6 +25,7 @@ public class MemberService {
     private final JwtUtil jwtUtil;
     private final CookieUtil cookieUtil;
 
+    @Transactional
     public MemberLoginResponseDto relogin(HttpServletRequest request, HttpServletResponse response) {
         String refresh = cookieUtil.getRefreshFromCookie(request);
         String access = null;
@@ -36,12 +40,12 @@ public class MemberService {
         return MemberLoginResponseDto.toDto(memberRepository.findById(memberId)
                 .orElseThrow(() -> new RestApiException(MemberErrorCode.MEMBER_NOT_FOUND)));
     }
-    public MyPageResponseDto getMyPage(HttpServletRequest request) {
+    public MyPageResponseDto getMyPage(Member member) {
 
-        return MyPageResponseDto.toDto(memberRepository.findById(jwtUtil.getMemberIdFromAccessToken(request))
-                .orElseThrow(() -> new RestApiException(MemberErrorCode.MEMBER_NOT_FOUND)));
+        return MyPageResponseDto.toDto(member);
     }
 
+    @Transactional
     public void logout(HttpServletRequest request, HttpServletResponse response) {
         String access = cookieUtil.getAccessFromCookie(request);
         String refresh = cookieUtil.getRefreshFromCookie(request);
@@ -53,6 +57,7 @@ public class MemberService {
         }
     }
 
+    @Transactional
     public void reissue(HttpServletRequest request, HttpServletResponse response) {
         String refresh = cookieUtil.getRefreshFromCookie(request);
         Long memberId = jwtUtil.getMemberIdFromToken(refresh, "refresh");
@@ -62,5 +67,33 @@ public class MemberService {
         } else {
             throw new RestApiException(MemberErrorCode.UNMATCHED_TOKEN);
         }
+    }
+
+    @Transactional
+    public void changeNickname(Long memberId, String nickname) {
+        Member member = findMember(memberId);
+        if (memberRepository.existsByNickname(nickname)) {
+            throw new RestApiException(MemberErrorCode.DUPLICATED_NICKNAME);
+        }
+        member.changeNickname(nickname);
+    }
+
+    @Transactional
+    public void changeProfileImg(Long memberId, String url) {
+        findMember(memberId).changeProfile(url);
+    }
+
+    @Transactional
+    public void toggleRecommends(Long memberId) {
+        findMember(memberId).toggleRecommends();
+    }
+
+    @Transactional
+    public void togglePush(Long memberId) {
+        findMember(memberId). togglePush();
+    }
+
+    public Member findMember(Long memberId) {
+        return memberRepository.findById(memberId).orElseThrow(() -> new RestApiException(MemberErrorCode.MEMBER_NOT_FOUND));
     }
 }
