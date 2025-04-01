@@ -28,20 +28,17 @@ public class CookieUtil {
 
     public void setTokenCookies(HttpServletRequest request, HttpServletResponse response,
                                 String accessToken, String refreshToken, boolean isDeletion) {
-        String host = request.getHeader("X-Forwarded-Host");
-        System.out.println("X-Forwarded-Host ???   " + host);
-        if (host == null) host = request.getHeader("Host");
-        System.out.println("Now host:  " + host);
+        /*String host = request.getHeader("X-Forwarded-Host");
+        if (host == null) host = request.getHeader("Host");*/
 
-        String domain = null;
+        /*String domain = null;
         if (host != null) {
             if (host.contains("dorandoran.online")) {
                 domain = ".dorandoran.online";
             } else if (host.contains("localhost")) {
                 domain = null;
             }
-        }
-        System.out.println("Setted Domain:  " + domain);
+        }*/
 
         ResponseCookie.ResponseCookieBuilder accessTokenCookie = ResponseCookie.from("access", accessToken)
                 .httpOnly(true)
@@ -49,26 +46,47 @@ public class CookieUtil {
         ResponseCookie.ResponseCookieBuilder refreshTokenCookie = ResponseCookie.from("refresh", refreshToken)
                 .httpOnly(true)
                 .path("/");
+        ResponseCookie.ResponseCookieBuilder localAccessTokenCookie = ResponseCookie.from("access", accessToken)
+                .httpOnly(true)
+                .path("/");
+        ResponseCookie.ResponseCookieBuilder localRefreshTokenCookie = ResponseCookie.from("refresh", refreshToken)
+                .httpOnly(true)
+                .path("/");
 
         if (isDeletion) {
             accessTokenCookie.maxAge(0);
             refreshTokenCookie.maxAge(0);
+            localAccessTokenCookie.maxAge(0);
+            localRefreshTokenCookie.maxAge(0);
         } else {
             accessTokenCookie.maxAge((int) (accessExp / 1000));
             refreshTokenCookie.maxAge((int) (refreshExp / 1000));
+            localAccessTokenCookie.maxAge((int) (accessExp / 1000));
+            localRefreshTokenCookie.maxAge((int) (refreshExp / 1000));
         }
 
-        if (domain != null) {
+        /*if (domain != null) {
             accessTokenCookie.domain(domain);
             refreshTokenCookie.domain(domain);
             accessTokenCookie.secure(true);
             refreshTokenCookie.secure(true);
             accessTokenCookie.sameSite("None");
             refreshTokenCookie.sameSite("None");
-        }
+        }*/
+        accessTokenCookie.domain(".dorandoran.online");
+        refreshTokenCookie.domain(".dorandoran.online");
+        accessTokenCookie.secure(true);
+        refreshTokenCookie.secure(true);
+        accessTokenCookie.sameSite("None");
+        refreshTokenCookie.sameSite("None");
+
+        localAccessTokenCookie.domain("localhost");
+        localRefreshTokenCookie.domain("localhost");
 
         response.addHeader(HttpHeaders.SET_COOKIE, accessTokenCookie.build().toString());
         response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.build().toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, localAccessTokenCookie.build().toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, localRefreshTokenCookie.build().toString());
     }
 
     // Cookie에서 access토큰 가져오기
