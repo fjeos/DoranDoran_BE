@@ -32,7 +32,7 @@ public class Member {
     @Column
     private Boolean state;
 
-    @Column
+    @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
     private Boolean recommends;
 
     @Column
@@ -45,4 +45,27 @@ public class Member {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    public void changeNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
+    public void changeProfile(String img) {
+        this.profileImg = img;
+    }
+
+    public void changeRecommends(boolean recommends) {
+        this.recommends = recommends;
+    }
+
+    public void changePush(boolean push) {
+        this.push = push;
+    }
+
+    public void toggleRecommends() {
+        this.recommends = !this.recommends;
+    }
+
+    public void togglePush() {
+        this.push = !this.push;
+    }
 }
