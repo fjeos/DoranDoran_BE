@@ -2,7 +2,6 @@ package com.example.dorandroan.global;
 
 import com.example.dorandroan.global.error.CommonErrorCode;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
@@ -12,10 +11,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 
 
 @RestControllerAdvice
@@ -41,11 +36,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                                                                    WebRequest request) {
 
         log.warn("handleMethodArgumentNotValidException : {}", "Invalid Arguments");
-        List<String> errList = e.getBindingResult().getFieldErrors().stream()
-                .map(DefaultMessageSourceResolvable::getDefaultMessage)
-                .toList();
-
-        return ResponseEntity.badRequest().body(makeResponse(CommonErrorCode.INVALID_PARAMETER, errList));
+        String errMsg = e.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .findFirst()
+                .map(FieldError::getDefaultMessage)
+                .orElse("Validation failed");
+        return ResponseEntity.badRequest().body(makeResponse(CommonErrorCode.INVALID_PARAMETER, errMsg));
     }
 
     @ExceptionHandler({Exception.class})
@@ -57,11 +54,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     private ResponseEntity<Object> handleExceptionInternal(ErrorCode errorCode) {
         return ResponseEntity.status(errorCode.getStatus())
-                .body(makeResponse(errorCode, List.of(errorCode.getMessage())));
+                .body(makeResponse(errorCode, errorCode.getMessage()));
     }
 
-    private ErrorResponse makeResponse(ErrorCode errorCode, List<String> errList) {
-        return ErrorResponse.of(errorCode.name(), errList);
+    private ErrorResponse makeResponse(ErrorCode errorCode, String errMsg) {
+        return ErrorResponse.of(errorCode.name(), errMsg);
     }
 
 }

@@ -58,11 +58,11 @@ public class CookieUtil {
         if (domain != null) {
             accessTokenCookie.domain(domain);
             refreshTokenCookie.domain(domain);
+            accessTokenCookie.secure(true);
+            refreshTokenCookie.secure(true);
+            accessTokenCookie.sameSite("None");
+            refreshTokenCookie.sameSite("None");
         }
-        accessTokenCookie.secure(true);
-        refreshTokenCookie.secure(true);
-        accessTokenCookie.sameSite("None");
-        refreshTokenCookie.sameSite("None");
 
         response.addHeader(HttpHeaders.SET_COOKIE, accessTokenCookie.build().toString());
         response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.build().toString());
@@ -92,4 +92,51 @@ public class CookieUtil {
         throw new RestApiException(CommonErrorCode.INVALID_PARAMETER);
     }
 
+    public void printHeader(HttpServletRequest request) {
+        System.out.println("\nIn the Print Method First");
+        System.out.println("Request Method: " + request.getMethod());
+
+        // 2. 요청 URI
+        System.out.println("Request URI: " + request.getRequestURI());
+
+        // 3. 요청 URL
+        System.out.println("Request URL: " + request.getRequestURL());
+
+        // 4. 쿼리 파라미터 출력
+        /*System.out.println("Query Parameters: ");
+        Enumeration<String> paramNames = request.getParameterNames();
+        while (paramNames.hasMoreElements()) {
+            String paramName = paramNames.nextElement();
+            String[] paramValues = request.getParameterValues(paramName);
+            for (String value : paramValues) {
+                System.out.println(paramName + " = " + value);
+            }
+        }*/
+
+        // 5. 요청 헤더 출력
+        System.out.println("Request Headers: ");
+        Enumeration<String> headerNames = request.getHeaderNames();
+        while (headerNames.hasMoreElements()) {
+            String headerName = headerNames.nextElement();
+            String headerValue = request.getHeader(headerName);
+            System.out.println(headerName + " = " + headerValue);
+        }
+
+        // 6. 요청 속성 출력
+        /*System.out.println("Request Attributes: ");
+        Enumeration<String> attributeNames = request.getAttributeNames();
+        while (attributeNames.hasMoreElements()) {
+            String attributeName = attributeNames.nextElement();
+            Object attributeValue = request.getAttribute(attributeName);
+            System.out.println(attributeName + " = " + attributeValue);
+        }*/
+
+        // 7. 쿠키 출력
+        System.out.println("Cookies: ");
+        if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                System.out.println("Cookie: " + cookie.getName() + " = " + cookie.getValue());
+            }
+        }
+    }
 }

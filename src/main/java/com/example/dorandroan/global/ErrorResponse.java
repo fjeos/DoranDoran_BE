@@ -15,9 +15,9 @@ import java.util.List;
 @AllArgsConstructor
 public class ErrorResponse {
     private String error;
-    private List<String> messages;
+    private String message;
 
-    public static ErrorResponse of(String errorMsg, List<String> msgList) {
-        return ErrorResponse.builder().error(errorMsg).messages(msgList).build();
+    public static ErrorResponse of(String errorMsg, String msg) {
+        return ErrorResponse.builder().error(errorMsg).message(msg).build();
     }
 }
