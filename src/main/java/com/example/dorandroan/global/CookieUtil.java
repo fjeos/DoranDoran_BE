@@ -29,6 +29,7 @@ public class CookieUtil {
     public void setTokenCookies(HttpServletRequest request, HttpServletResponse response,
                                 String accessToken, String refreshToken, boolean isDeletion) {
         String host = request.getHeader("X-Forwarded-Host");
+        System.out.println("X-Forwarded-Host ???   " + host);
         if (host == null) host = request.getHeader("Host");
         System.out.println("Now host:  " + host);
 
