@@ -49,6 +49,9 @@ public class MemberController {
     }
     @GetMapping("/nickname")
     public ResponseEntity<Boolean> checkNickname(@RequestParam("word") String nickname) {
+        if(!nickname.matches("^[가-힣a-zA-Z]{2,8}$")) {
+            throw new RestApiException(MemberErrorCode.MISMATCH_NICKNAME_FORMAT);
+        }
         memberRegistrationService.checkNickname(nickname);
         return ResponseEntity.ok().build();
     }
