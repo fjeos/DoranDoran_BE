@@ -1,6 +1,7 @@
 package com.example.dorandroan.global;
 
 import com.example.dorandroan.global.error.CommonErrorCode;
+import com.example.dorandroan.global.error.TokenErrorCode;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -110,7 +111,7 @@ public class CookieUtil {
                 }
             }
         }
-        throw new RestApiException(CommonErrorCode.INVALID_PARAMETER);
+        throw new RestApiException(TokenErrorCode.INVALID_REFRESH_TOKEN);
     }
 
     public void printHeader(HttpServletRequest request) {

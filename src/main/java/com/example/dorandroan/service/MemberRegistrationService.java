@@ -1,9 +1,11 @@
 package com.example.dorandroan.service;
 
+import com.example.dorandroan.dto.ResetPwRequestDto;
 import com.example.dorandroan.dto.SignUpRequestDto;
 import com.example.dorandroan.entity.Member;
 import com.example.dorandroan.entity.Role;
 import com.example.dorandroan.global.RestApiException;
+import com.example.dorandroan.global.error.MailAuthErrorCode;
 import com.example.dorandroan.global.error.MemberErrorCode;
 import com.example.dorandroan.global.error.TokenErrorCode;
 import com.example.dorandroan.global.jwt.CustomUserDetails;
@@ -21,14 +23,15 @@ import org.springframework.transaction.annotation.Transactional;
 public class MemberRegistrationService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
-    private final JwtUtil jwtUtil;
+    private final RedisService redisService;
 
     @Transactional
     public void signUp(SignUpRequestDto requestDto) {
 
-        if (findByNickname(requestDto.getNickname()) || findByEmail(requestDto.getEmail())) {
+        if (findByNickname(requestDto.getNickname()) || findByEmail(requestDto.getEmail()))
             throw new RestApiException(MemberErrorCode.DUPLICATED_NICKNAME);
-        }
+        if (redisService.isConfirmedEmail(requestDto.getEmail()))
+            throw new RestApiException(MemberErrorCode.UNAPPROVED_EMAIL);
 
         memberRepository.save(Member.builder().email(requestDto.getEmail())
                 .password(passwordEncoder.encode(requestDto.getPassword()))
@@ -47,21 +50,6 @@ public class MemberRegistrationService {
             throw new RestApiException(MemberErrorCode.DUPLICATED_NICKNAME);
         }
     }
-    //TODO 로그아웃 로직 변경 -> 쿠키에서 refresh 가져오기
-    public void logout(CustomUserDetails user, HttpServletRequest request) {
-        Long memberId = null;
-        String header = request.getHeader("Authorization");
-        if (header != null && header.startsWith(("Bearer "))) {
-            String token = header.substring(7);
-            if (jwtUtil.validateAccessToken(token)) {
-                memberId = jwtUtil.getMemberIdFromToken(token, "access");
-            } else {
-                throw new RestApiException(TokenErrorCode.INVALID_ACCESS_TOKEN);
-            }
-        }
-        Member member = memberRepository.findById(memberId).orElseThrow(() -> new RestApiException(MemberErrorCode.MEMBER_NOT_FOUND));
-
-    }
 
     private boolean findByNickname(String nickname) {
         return memberRepository.existsByNickname(nickname);
@@ -71,4 +59,16 @@ public class MemberRegistrationService {
         return memberRepository.existsByEmail(email);
     }
 
+    @Transactional
+    public void resetPassword(ResetPwRequestDto requestDto) {
+        String email = requestDto.getEmail();
+        if (!redisService.isConfirmedEmail(email)) {
+            throw new RestApiException(MemberErrorCode.UNAPPROVED_EMAIL);
+        }
+        Member member = memberRepository.findByEmail(email).orElseThrow(() -> new RestApiException(MemberErrorCode.MEMBER_NOT_FOUND));
+        String newPassword = requestDto.getNewPassword();
+        if (passwordEncoder.matches(newPassword, member.getPassword()))
+            throw new RestApiException(MemberErrorCode.SAME_PASSWORD);
+        member.changePassword(passwordEncoder.encode(newPassword));
+    }
 }

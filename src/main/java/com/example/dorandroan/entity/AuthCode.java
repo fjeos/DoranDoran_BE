@@ -15,7 +15,13 @@ import java.io.Serializable;
 public class AuthCode implements Serializable {
 
     @Id
-    private String clientCode;
+    private String email;
 
     private Integer authCode;
+
+    private Boolean approved = false;
+
+    public void updateApproved() {
+        this.approved = true;
+    }
 }

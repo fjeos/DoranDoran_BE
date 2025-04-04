@@ -1,6 +1,5 @@
 package com.example.dorandroan.service;
 
-import com.example.dorandroan.dto.ClientCodeResponseDto;
 import com.example.dorandroan.dto.CodeAuthRequestDto;
 import com.example.dorandroan.dto.EmailAuthRequestDto;
 import com.example.dorandroan.entity.AuthCode;
@@ -14,6 +13,7 @@ import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import jakarta.mail.MessagingException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
 import java.util.UUID;
@@ -28,7 +28,7 @@ public class MailService {
     private final MemberRegistrationService memberRegistrationService;
     private final RedisService redisService;
 
-    public ClientCodeResponseDto sendEmail(EmailAuthRequestDto requestDto) throws MessagingException {
+    public void sendEmail(EmailAuthRequestDto requestDto) throws MessagingException {
         String receiver = requestDto.getEmail();
         boolean findUser = memberRegistrationService.findByEmail(receiver);
         if (requestDto.getIsSignUp()) {
@@ -40,7 +40,7 @@ public class MailService {
                 throw new RestApiException(MemberErrorCode.MEMBER_NOT_FOUND);
             }
         }
-        return ClientCodeResponseDto.builder().clientCode(sendSimpleMessage(receiver)).build();
+        sendSimpleMessage(receiver);
     }
 
     private Integer createNumber() {
@@ -68,7 +68,7 @@ public class MailService {
         return message;
     }
 
-    public String sendSimpleMessage(String receiverEmail) throws MessagingException {
+    public void sendSimpleMessage(String receiverEmail) throws MessagingException {
         Integer authCode = createNumber();
 
         MimeMessage message = createMail(receiverEmail, authCode);
@@ -77,15 +77,16 @@ public class MailService {
         } catch (MailException e) {
             throw new RestApiException(MemberErrorCode.MAIL_ERROR);
         }
-        String clientNumber = createClientNumber(receiverEmail);
-        redisService.saveCode(clientNumber, authCode);
-        return clientNumber;
+        redisService.saveCode(receiverEmail, authCode);
     }
 
     public void confirmCode(CodeAuthRequestDto requestDto) {
-        AuthCode foundCode = redisService.findByClientCode(requestDto.getClientCode());
+        AuthCode foundCode = redisService.findByEmail(requestDto.getEmail());
+        if (foundCode.getApproved())
+            throw new RestApiException(MailAuthErrorCode.ALREADY_APPROVED);
         if (!foundCode.getAuthCode().equals(requestDto.getAuthCode())) {
             throw new RestApiException(MailAuthErrorCode.CODE_UNMATCHED);
         }
+        redisService.confirmCode(foundCode);
     }
 }

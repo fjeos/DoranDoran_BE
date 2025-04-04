@@ -7,5 +7,4 @@ import java.util.Optional;
 
 public interface AuthCodeRepository extends CrudRepository<AuthCode, String> {
 
-    Optional<AuthCode> findByClientCode(String clientCode);
 }

@@ -2,13 +2,16 @@ package com.example.dorandroan.service;
 
 import com.example.dorandroan.dto.MemberLoginResponseDto;
 import com.example.dorandroan.dto.MyPageResponseDto;
+import com.example.dorandroan.dto.ResetPwRequestDto;
 import com.example.dorandroan.entity.Member;
 import com.example.dorandroan.global.CookieUtil;
 import com.example.dorandroan.global.RestApiException;
+import com.example.dorandroan.global.error.MailAuthErrorCode;
 import com.example.dorandroan.global.error.MemberErrorCode;
 import com.example.dorandroan.global.error.TokenErrorCode;
 import com.example.dorandroan.global.jwt.JwtUtil;
 import com.example.dorandroan.repository.MemberRepository;
+import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -96,4 +99,5 @@ public class MemberService {
     public Member findMember(Long memberId) {
         return memberRepository.findById(memberId).orElseThrow(() -> new RestApiException(MemberErrorCode.MEMBER_NOT_FOUND));
     }
+
 }

@@ -49,16 +49,12 @@ public class Member {
         this.nickname = nickname;
     }
 
+    public void changePassword(String password) {
+        this.password = password;
+    }
+
     public void changeProfile(String img) {
         this.profileImg = img;
-    }
-
-    public void changeRecommends(boolean recommends) {
-        this.recommends = recommends;
-    }
-
-    public void changePush(boolean push) {
-        this.push = push;
     }
 
     public void toggleRecommends() {

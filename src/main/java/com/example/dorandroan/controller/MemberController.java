@@ -9,19 +9,16 @@ import com.example.dorandroan.service.MemberRegistrationService;
 import com.example.dorandroan.service.MemberService;
 import jakarta.annotation.PostConstruct;
 import jakarta.mail.MessagingException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Enumeration;
 import java.util.Map;
 
 @RestController
@@ -56,15 +53,10 @@ public class MemberController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping
-    public ResponseEntity<Void> logout(@AuthenticationPrincipal CustomUserDetails user, HttpServletRequest request) {
-        memberRegistrationService.logout(user, request);
-        return ResponseEntity.ok().build();
-    }
-
     @PostMapping("/auth/email")
-    public ResponseEntity<ClientCodeResponseDto> sendEmail(@Valid @RequestBody EmailAuthRequestDto requestDto) throws MessagingException {
-        return ResponseEntity.ok(mailService.sendEmail(requestDto));
+    public ResponseEntity<Void> sendEmail(@Valid @RequestBody EmailAuthRequestDto requestDto) throws MessagingException {
+        mailService.sendEmail(requestDto);
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/auth/code")
@@ -82,6 +74,12 @@ public class MemberController {
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(HttpServletRequest request, HttpServletResponse response) {
         memberService.logout(request, response);
+        return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/password")
+    public ResponseEntity<Void> resetPassword(@Valid @RequestBody ResetPwRequestDto requestDto) {
+        memberRegistrationService.resetPassword(requestDto);
         return ResponseEntity.ok().build();
     }
 
