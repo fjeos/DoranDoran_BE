@@ -60,7 +60,8 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(
                         auth -> auth
-                                .requestMatchers("/", "/health", "/member/signup", "/member/nickname", "/member/auth/*", "/member/relogin").permitAll()
+                                .requestMatchers("/", "/health", "/member/signup", "/member/nickname",
+                                        "/member/auth/*", "/member/relogin", "/member/password").permitAll()
                                 .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(new JwtAuthFilter(customUserDetailsService, redisService, cookieUtil, jwtUtil), CustomAuthFilter.class)

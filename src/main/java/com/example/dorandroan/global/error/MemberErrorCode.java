@@ -15,6 +15,8 @@ public enum MemberErrorCode implements ErrorCode {
     MISMATCH_NICKNAME_FORMAT(HttpStatus.BAD_REQUEST, "닉네임 형식이 올바르지 않습니다."),
     MISMATCH_PASSWORD_FORMAT(HttpStatus.BAD_REQUEST, "비밀번호 형식이 올바르지 않습니다."),
     MISMATCH_IMG_URL_FORMAT(HttpStatus.BAD_REQUEST, "이미지 URL 형식이 올바르지 않습니다."),
+    UNAPPROVED_EMAIL(HttpStatus.BAD_REQUEST, "인증이 완료되지 않은 이메일입니다."),
+    SAME_PASSWORD(HttpStatus.BAD_REQUEST, "새 비밀번호는 기존 비밀번호와 일치할 수 없습니다."),
 
 
     // 403 Forbidden
