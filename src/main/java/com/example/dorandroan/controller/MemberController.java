@@ -36,7 +36,7 @@ public class MemberController {
     private static String s3Url;
     @PostConstruct
     private void init() {
-        s3Url = "https://" + bucket + ".s3.ap-northeast-2.amazonaws.com/";
+        s3Url = "https://" + bucket + ".s3.amazonaws.com/";
     }
 
     @PostMapping("/signup")
