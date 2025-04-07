@@ -24,21 +24,16 @@ public class S3Service {
     private String bucketName;
 
     public String generatePresignedUrl(ImageRequestDto requestDto) {
-        String objectKey = generateFileName(requestDto.getFileName());
 
         PresignedPutObjectRequest presignedRequest = s3Presigner.presignPutObject(
                 PutObjectPresignRequest.builder()
                         .signatureDuration(Duration.ofMinutes(10))  // URL 유효 시간
-                        .putObjectRequest(PutObjectRequest.builder().bucket(bucketName).key(objectKey).build())
+                        .putObjectRequest(PutObjectRequest.builder().bucket(bucketName).key(requestDto.getFileName()).build())
                         .build()
         );
 
         return presignedRequest.url().toString();
 
-    }
-
-    private String generateFileName(String originalFileName) {
-        return UUID.randomUUID() + "-" + originalFileName;
     }
 
 }
