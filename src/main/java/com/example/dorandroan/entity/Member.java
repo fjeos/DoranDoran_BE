@@ -29,7 +29,7 @@ public class Member {
     @Column
     private String profileImg;
 
-    @Column
+    @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
     private Boolean state;
 
     @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
@@ -63,5 +63,9 @@ public class Member {
 
     public void togglePush() {
         this.push = !this.push;
+    }
+
+    public void deleteMember() {
+        this.state = true;
     }
 }
