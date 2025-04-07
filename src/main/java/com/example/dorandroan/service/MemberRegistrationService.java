@@ -17,6 +17,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Map;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -70,5 +72,16 @@ public class MemberRegistrationService {
         if (passwordEncoder.matches(newPassword, member.getPassword()))
             throw new RestApiException(MemberErrorCode.SAME_PASSWORD);
         member.changePassword(passwordEncoder.encode(newPassword));
+    }
+
+    @Transactional
+    public void deleteMember(Long memberId, String password) {
+
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new RestApiException(MemberErrorCode.MEMBER_NOT_FOUND));
+        if (!passwordEncoder.matches(password, member.getPassword())) {
+            throw new RestApiException(MemberErrorCode.INVALID_PASSWORD);
+        }
+
+        member.deleteMember();
     }
 }

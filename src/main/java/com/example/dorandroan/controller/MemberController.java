@@ -127,4 +127,13 @@ public class MemberController {
         memberService.togglePush(member.getMember().getMemberId());
         return ResponseEntity.ok().build();
     }
+
+    @DeleteMapping("/withdraw")
+    public ResponseEntity<Void> deleteMember(@AuthenticationPrincipal CustomUserDetails member,
+                                             @RequestBody Map<String, String> password) {
+        if (member.getState())
+            throw new RestApiException(MemberErrorCode.DELETED_MEMBER);
+        memberRegistrationService.deleteMember(member.getMember().getMemberId(), password.get("password"));
+        return ResponseEntity.ok().build();
+    }
 }
