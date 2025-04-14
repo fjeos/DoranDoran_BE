@@ -54,3 +54,8 @@ cloud:
       bucket: dorandoran-img
     region:
       static: ap-northeast-2
+
+logging:
+  level:
+    org.springframework.mail: DEBUG
+    org.apache.commons.mail: DEBUG
