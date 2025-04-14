@@ -75,6 +75,8 @@ public class MailService {
         try {
             javaMailSender.send(message);
         } catch (MailException e) {
+            System.out.println("메일 전송 중 에러 발생");
+            System.out.println(e.getMessage());
             throw new RestApiException(MemberErrorCode.MAIL_ERROR);
         }
         redisService.saveCode(receiverEmail, authCode);
