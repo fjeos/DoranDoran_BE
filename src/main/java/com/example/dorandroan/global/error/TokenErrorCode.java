@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 public enum TokenErrorCode  implements ErrorCode {
 
     EXPIRED_TOKEN(HttpStatus.BAD_REQUEST, "만료된 토큰입니다."),
+    NULL_TOKEN(HttpStatus.BAD_REQUEST, "토큰은 Null일 수 없습니다."),
 
     // 401 Unauthorized
     INVALID_ACCESS_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다."),

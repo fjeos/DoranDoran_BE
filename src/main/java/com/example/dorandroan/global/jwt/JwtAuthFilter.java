@@ -1,6 +1,7 @@
 package com.example.dorandroan.global.jwt;
 
 import com.example.dorandroan.global.CookieUtil;
+import com.example.dorandroan.global.ErrorCode;
 import com.example.dorandroan.global.error.TokenErrorCode;
 import com.example.dorandroan.service.RedisService;
 import io.jsonwebtoken.Claims;
@@ -47,15 +48,23 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                         new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                 SecurityContextHolder.getContext().setAuthentication(authToken);
 
-            } catch (ExpiredJwtException e) {
-                log.error("토큰이 만료되었습니다.");
-                response.setStatus(HttpStatus.UNAUTHORIZED.value());
-                response.setContentType("application/json;charset=UTF-8");
-                response.getWriter().write(String.format("{\"message\": \"%s\"}", TokenErrorCode.EXPIRED_TOKEN.getMessage()));
+            } catch (IllegalArgumentException ex) {
+                setErrorResponse(response, TokenErrorCode.NULL_TOKEN);
+
+                return;
+            }  catch (ExpiredJwtException e) {
+                setErrorResponse(response, TokenErrorCode.EXPIRED_TOKEN);
 
                 return;
             }
         }
         filterChain.doFilter(request, response);
+    }
+
+    private void setErrorResponse(HttpServletResponse response, ErrorCode code) throws IOException {
+        log.error(code.getMessage());
+        response.setStatus(HttpStatus.UNAUTHORIZED.value());
+        response.setContentType("application/json;charset=UTF-8");
+        response.getWriter().write(String.format("{\"message\": \"%s\"}", code.getMessage()));
     }
 }
