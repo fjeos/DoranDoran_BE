@@ -19,6 +19,7 @@ public class AuthCode implements Serializable {
 
     private Integer authCode;
 
+    @Builder.Default
     private Boolean approved = false;
 
     public void updateApproved() {
