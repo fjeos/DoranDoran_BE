@@ -32,15 +32,16 @@ public class MemberRegistrationService {
 
         if (findByNickname(requestDto.getNickname()) || findByEmail(requestDto.getEmail()))
             throw new RestApiException(MemberErrorCode.DUPLICATED_NICKNAME);
-        if (redisService.isConfirmedEmail(requestDto.getEmail()))
+        if (!redisService.isConfirmedEmail(requestDto.getEmail()))
             throw new RestApiException(MemberErrorCode.UNAPPROVED_EMAIL);
 
         memberRepository.save(Member.builder().email(requestDto.getEmail())
                 .password(passwordEncoder.encode(requestDto.getPassword()))
                 .nickname(requestDto.getNickname())
                 .profileImg(null)
-                .state(true)
-                .recommends(true)
+                .state(false)
+                .recommends(false)
+                .push(true)
                 .deviceToken(null)
                 .role(Role.USER)
                 .build());
