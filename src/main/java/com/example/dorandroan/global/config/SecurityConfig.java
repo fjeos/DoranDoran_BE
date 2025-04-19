@@ -62,7 +62,7 @@ public class SecurityConfig {
                         auth -> auth
                                 .requestMatchers("/", "/health", "/member/signup", "/member/nickname",
                                         "/member/auth/*", "/member/relogin", "/member/password",
-                                        "/ws/**", "/chat/**", "/topic/**", "/home.html").permitAll()
+                                        "/ws/**", "/chat/**", "/topic/**").permitAll()
                                 .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(new JwtAuthFilter(customUserDetailsService, redisService, cookieUtil, jwtUtil), CustomAuthFilter.class)
