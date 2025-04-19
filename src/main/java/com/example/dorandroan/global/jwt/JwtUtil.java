@@ -115,9 +115,4 @@ public class JwtUtil {
         }
     }
 
-    public Long getMemberIdFromAccessToken(HttpServletRequest request) {
-        String token = cookieUtil.getAccessFromCookie(request);
-        this.validateAccessToken(token);
-        return this.getMemberIdFromToken(token, "access");
-    }
 }
