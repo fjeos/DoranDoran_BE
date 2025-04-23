@@ -1,5 +1,6 @@
 package com.example.dorandroan.global;
 
+import com.example.dorandroan.global.error.ChattingErrorCode;
 import com.example.dorandroan.global.jwt.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +32,8 @@ public class WebSocketAuthInterceptor implements HandshakeInterceptor {
                 return true;
             }
         }
-        return false;
+        throw new RestApiException(ChattingErrorCode.HANDSHAKE_ERROR);
+        //return false;
     }
 
     @Override
