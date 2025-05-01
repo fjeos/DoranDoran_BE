@@ -38,16 +38,7 @@ public class ChatService {
         System.out.println("=================================");
     }
 
-    @Transactional
-    public Long createChatRoom(ChatRoomRequestDto requestDto) {
-        return chatRoomRepository.save(ChatRoom.builder().
-                title(requestDto.getChatRoomTitle())
-                .chatRoomImg(requestDto.getChatRoomImage())
-                .description(requestDto.getDescription())
-                .maxPartIn(requestDto.getMaxCount())
-                .closed(false)
-                .build()).getChatroomId();
-    }
+
 
     @Transactional
     public void sendMessage(Long roomId, Long memberId, ChatDto chatDto) {

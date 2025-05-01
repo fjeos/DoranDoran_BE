@@ -19,6 +19,7 @@ public class Chat {
 
     @Id
     private String chatId;
+    private Long chatRoomId;
     private Long senderId;
     private String content;
     private String type;
