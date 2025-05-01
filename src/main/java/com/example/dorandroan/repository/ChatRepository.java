@@ -9,4 +9,6 @@ import java.util.Optional;
 @Repository
 public interface ChatRepository extends MongoRepository<Chat, String> {
     Optional<Chat> findBySenderId(Long senderId);
+
+    Chat findTopByChatRoomIdOrderBySendAtDesc(Long chatRoomId);
 }

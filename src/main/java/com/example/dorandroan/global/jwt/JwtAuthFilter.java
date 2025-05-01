@@ -2,6 +2,7 @@ package com.example.dorandroan.global.jwt;
 
 import com.example.dorandroan.global.CookieUtil;
 import com.example.dorandroan.global.ErrorCode;
+import com.example.dorandroan.global.error.CommonErrorCode;
 import com.example.dorandroan.global.error.TokenErrorCode;
 import com.example.dorandroan.service.RedisService;
 import io.jsonwebtoken.Claims;
@@ -14,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -49,7 +51,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authToken);
 
             } catch (IllegalArgumentException ex) {
-                setErrorResponse(response, TokenErrorCode.NULL_TOKEN);
+                setErrorResponse(response, CommonErrorCode.INVALID_PARAMETER);
 
                 return;
             }  catch (ExpiredJwtException e) {

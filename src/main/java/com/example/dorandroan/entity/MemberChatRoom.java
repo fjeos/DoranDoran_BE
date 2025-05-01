@@ -15,18 +15,19 @@ public class MemberChatRoom {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long memberChatroomId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
 
     @Column(nullable = false)
-    private String role;
+    @Enumerated(EnumType.STRING)
+    private ChatRoomRole role;
 
     @Column(nullable = false)
     private Boolean quit;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "chatroom_id")
-    private ChatRoom chatroom;
+    private ChatRoom chatRoom;
 
 }
