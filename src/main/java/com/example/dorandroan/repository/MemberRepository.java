@@ -18,6 +18,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     boolean existsByNickname(String nickname);
     boolean existsByEmail(String email);
 
-    @Query("SELECT m FROM Member m WHERE m.recommends = true")
+    @Query("SELECT m FROM Member m WHERE m.recommends = true and m.state = false")
     List<Member> findByRecommends();
 }
