@@ -54,4 +54,11 @@ public class ChatRoomController {
                 chatRoomService.createPrivateChatroom(member, requestDto.get("memberId"))));
     }
 
+    @PostMapping("/group")
+    public ResponseEntity<Void> enterGroupChatroom(@AuthenticationPrincipal CustomUserDetails member,
+                                                   @RequestParam("id") Long chatRoomId) {
+        chatRoomService.enterGroupChatroom(member, chatRoomId);
+        return ResponseEntity.ok().build();
+    }
+
 }

@@ -37,10 +37,10 @@ public class ChatRoomService {
                 .closed(false)
                 .build();
         groupChatRoomRepository.save(newChatRoom);
-        MemberChatroom.builder().member(member)
+        memberChatRoomRepository.save(MemberChatroom.builder().member(member)
                 .role(ChatRoomRole.LEAD)
                 .quit(false)
-                .groupChatroom(newChatRoom);
+                .groupChatroom(newChatRoom).build());
         return newChatRoom.getGroupChatroomId();
     }
 
@@ -90,5 +90,22 @@ public class ChatRoomService {
                 PrivateChatroom.builder()
                 .aId(member.getMember().getMemberId())
                 .bId(memberId).build()).getPrivateChatroomId();
+    }
+
+    @Transactional
+    public void enterGroupChatroom(CustomUserDetails member, Long chatRoomId) {
+
+        GroupChatroom groupChatroom = groupChatRoomRepository.findById(chatRoomId)
+                .orElseThrow(() -> new RestApiException(ChattingErrorCode.CHATROOM_NOT_FOUND));
+
+        System.out.println("Now Member  " + member.getMember().getMemberId());
+        if (memberChatRoomRepository.existsByMember_MemberIdAndGroupChatroom_GroupChatroomId(
+                member.getMember().getMemberId(), chatRoomId))
+            throw new RestApiException(ChattingErrorCode.ALREADY_JOINED);
+
+        memberChatRoomRepository.save(MemberChatroom.builder()
+                .groupChatroom(groupChatroom)
+                .member(memberService.findMember(member.getMember().getMemberId()))
+                .role(ChatRoomRole.PART).build());
     }
 }
