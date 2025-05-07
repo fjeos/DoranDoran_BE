@@ -2,8 +2,10 @@ package com.example.dorandroan.repository;
 
 import com.example.dorandroan.entity.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -15,4 +17,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     boolean existsByNickname(String nickname);
     boolean existsByEmail(String email);
+
+    @Query("SELECT m FROM Member m WHERE m.recommends = true")
+    List<Member> findByRecommends();
 }

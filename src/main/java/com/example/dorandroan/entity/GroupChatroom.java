@@ -6,15 +6,15 @@ import lombok.*;
 @Entity
 @Getter
 @Builder
-@Table(name = "CHATROOM")
+@Table(name = "GROUP_CHATROOM")
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class ChatRoom {
+public class GroupChatroom {
 
     @Id
-    @Column(name = "chatroom_id")
+    @Column(name = "group_chatroom_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long chatroomId;
+    private Long groupChatroomId;
 
     @Column
     private String title;

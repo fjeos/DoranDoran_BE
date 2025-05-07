@@ -2,15 +2,14 @@ package com.example.dorandroan.service;
 
 import com.example.dorandroan.dto.ChatDto;
 import com.example.dorandroan.dto.ChatResponseDto;
-import com.example.dorandroan.dto.ChatRoomRequestDto;
-import com.example.dorandroan.entity.Chat;
-import com.example.dorandroan.entity.ChatRoom;
+import com.example.dorandroan.entity.GroupChat;
 import com.example.dorandroan.entity.Member;
+import com.example.dorandroan.entity.PrivateChat;
 import com.example.dorandroan.global.RestApiException;
-import com.example.dorandroan.global.error.ChattingErrorCode;
 import com.example.dorandroan.global.error.MemberErrorCode;
-import com.example.dorandroan.repository.ChatRepository;
-import com.example.dorandroan.repository.ChatRoomRepository;
+import com.example.dorandroan.repository.GroupChatRepository;
+import com.example.dorandroan.repository.GroupChatRoomRepository;
+import com.example.dorandroan.repository.PrivateChatRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -24,36 +23,38 @@ import java.util.UUID;
 @Transactional(readOnly = true)
 public class ChatService {
     private final MemberService memberService;
-    private final ChatRepository chatRepository;
+    private final GroupChatRepository groupChatRepository;
+    private final PrivateChatRepository privateChatRepository;
     private final SimpMessagingTemplate template;
-    private final ChatRoomRepository chatRoomRepository;
-
-    public void findChatBySenderId(Long senderId) {
-        Chat chat = chatRepository.findBySenderId(senderId).orElseThrow(() -> new RestApiException(MemberErrorCode.UNAPPROVED_EMAIL));
-        System.out.println("============FIND CHAT============");
-        System.out.println(chat.getChatId());
-        System.out.println(chat.getSenderId());
-        System.out.println(chat.getContent());
-        System.out.println(chat.getType());
-        System.out.println("=================================");
-    }
-
-
+    private final GroupChatRoomRepository chatRoomRepository;
 
     @Transactional
-    public void sendMessage(Long roomId, Long memberId, ChatDto chatDto) {
-        ChatRoom chatRoom = chatRoomRepository.findById(roomId)
-                .orElseThrow(() -> new RestApiException(ChattingErrorCode.CHATROOM_NOT_FOUND));
+    public void sendGroupMessage(Long roomId, Long memberId, ChatDto chatDto) {
         Member sender = memberService.findMember(memberId);
-        Member receiver;
 
-        Chat newChat = chatRepository.save(Chat.builder().senderId(sender.getMemberId())
-                .chatId(UUID.randomUUID().toString())
+        GroupChat newChat = groupChatRepository.save(GroupChat.builder().senderId(sender.getMemberId())
+                .groupChatId(UUID.randomUUID().toString())
+                .chatRoomId(roomId)
                 .content(chatDto.getContent())
                 .type(chatDto.getType())
                 .sendAt(LocalDateTime.now())
                 .build());
-        template.convertAndSend("/chatRoom/" + roomId, ChatResponseDto.toDto(newChat, sender));
+        template.convertAndSend("/chatRoom/group/" + roomId, ChatResponseDto.toDto(newChat, sender));
     }
+
+    @Transactional
+    public void sendPrivateMessage(Long roomId, Long memberId, ChatDto chatDto) {
+        Member sender = memberService.findMember(memberId);
+
+        PrivateChat newChat = privateChatRepository.save(PrivateChat.builder().senderId(sender.getMemberId())
+                .privateChatId(UUID.randomUUID().toString())
+                .chatRoomId(roomId)
+                .content(chatDto.getContent())
+                .type(chatDto.getType())
+                .sendAt(LocalDateTime.now())
+                .build());
+        template.convertAndSend("/chatRoom/private/" + roomId, ChatResponseDto.toDto(newChat, sender));
+    }
+
 
 }

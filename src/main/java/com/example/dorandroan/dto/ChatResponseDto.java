@@ -1,6 +1,7 @@
 package com.example.dorandroan.dto;
 
 import com.example.dorandroan.entity.Chat;
+import com.example.dorandroan.entity.GroupChat;
 import com.example.dorandroan.entity.Member;
 import lombok.Builder;
 import lombok.Getter;

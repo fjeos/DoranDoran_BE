@@ -1,12 +1,11 @@
 package com.example.dorandroan.dto;
 
-import com.example.dorandroan.entity.Chat;
-import com.example.dorandroan.entity.ChatRoom;
+import com.example.dorandroan.entity.GroupChat;
+import com.example.dorandroan.entity.GroupChatroom;
 import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 @Getter
@@ -20,9 +19,9 @@ public class ChatRoomListResponseDto {
     private String lastChatContent;
     private String lastChatTime;
 
-    public static ChatRoomListResponseDto toDto(ChatRoom chatRoom, Chat lastChat) {
+    public static ChatRoomListResponseDto toDto(GroupChatroom chatRoom, GroupChat lastChat) {
         return ChatRoomListResponseDto.builder()
-                .chatRoomId(chatRoom.getChatroomId())
+                .chatRoomId(chatRoom.getGroupChatroomId())
                 .chatRoomTitle(chatRoom.getTitle())
                 .partInPeople(chatRoom.getMaxPartIn())
                 .chatRoomImage(chatRoom.getChatRoomImg())
@@ -31,7 +30,7 @@ public class ChatRoomListResponseDto {
                 .lastChatTime(changeDateToString(lastChat))
                 .build();
     }
-    private static String changeDateToString(Chat chat) {
+    private static String changeDateToString(GroupChat chat) {
         if (chat.getSendAt().toLocalDate().isEqual(LocalDate.now())) {
             return chat.getSendAt().format(DateTimeFormatter.ofPattern("a hh:mm"));
         } else {

@@ -1,15 +1,12 @@
 package com.example.dorandroan.service;
 
-import com.example.dorandroan.dto.ChatRoomListResponseDto;
-import com.example.dorandroan.dto.ChatRoomMembersResponseDto;
-import com.example.dorandroan.dto.ChatRoomRequestDto;
-import com.example.dorandroan.dto.ProfileResponseDto;
+import com.example.dorandroan.dto.*;
 import com.example.dorandroan.entity.*;
 import com.example.dorandroan.global.RestApiException;
 import com.example.dorandroan.global.error.ChattingErrorCode;
 import com.example.dorandroan.global.jwt.CustomUserDetails;
-import com.example.dorandroan.repository.ChatRepository;
-import com.example.dorandroan.repository.ChatRoomRepository;
+import com.example.dorandroan.repository.GroupChatRepository;
+import com.example.dorandroan.repository.GroupChatRoomRepository;
 import com.example.dorandroan.repository.MemberChatRoomRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,38 +20,38 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class ChatRoomService {
 
-    private final ChatRoomRepository chatRoomRepository;
+    private final GroupChatRoomRepository groupChatRoomRepository;
     private final MemberChatRoomRepository memberChatRoomRepository;
-    private final ChatRepository chatRepository;
+    private final GroupChatRepository chatRepository;
     private final MemberService memberService;
 
     @Transactional
     public Long createChatRoom(Member member, ChatRoomRequestDto requestDto) {
 
-        ChatRoom newChatRoom = ChatRoom.builder().
+        GroupChatroom newChatRoom = GroupChatroom.builder().
                 title(requestDto.getChatRoomTitle())
                 .chatRoomImg(requestDto.getChatRoomImage())
                 .description(requestDto.getDescription())
                 .maxPartIn(requestDto.getMaxCount())
                 .closed(false)
                 .build();
-        chatRoomRepository.save(newChatRoom);
-        MemberChatRoom.builder().member(member)
+        groupChatRoomRepository.save(newChatRoom);
+        MemberChatroom.builder().member(member)
                 .role(ChatRoomRole.LEAD)
                 .quit(false)
-                .chatRoom(newChatRoom);
-        return newChatRoom.getChatroomId();
+                .groupChatroom(newChatRoom);
+        return newChatRoom.getGroupChatroomId();
     }
 
     public List<ChatRoomListResponseDto> getChatRoomLists(CustomUserDetails member) {
 
-        List<ChatRoom> chatRoomList = memberChatRoomRepository.findChatRoomByMember(member.getMember());
+        List<GroupChatroom> chatRoomList = memberChatRoomRepository.findChatRoomByMember(member.getMember());
         if (chatRoomList.isEmpty())
             throw new RestApiException(ChattingErrorCode.CHATROOM_NOT_FOUND);
 
         return  chatRoomList.stream().map(
                 c -> ChatRoomListResponseDto.toDto(c,
-                        chatRepository.findTopByChatRoomIdOrderBySendAtDesc(c.getChatroomId()))
+                        chatRepository.findTopByChatRoomIdOrderBySendAtDesc(c.getGroupChatroomId()))
         ).collect(Collectors.toList());
     }
 
@@ -72,5 +69,11 @@ public class ChatRoomService {
     public ProfileResponseDto getMemberProfile(Long memberId) {
 
         return ProfileResponseDto.toDto(memberService.findMember(memberId));
+    }
+
+    public List<RecommendMemberResponseDto> getRecommendMembers() {
+
+        return memberService.getRecommendMembers().stream()
+                .map(RecommendMemberResponseDto::toDto).collect(Collectors.toList());
     }
 }
