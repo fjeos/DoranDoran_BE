@@ -4,15 +4,15 @@ import com.example.dorandroan.dto.*;
 import com.example.dorandroan.entity.*;
 import com.example.dorandroan.global.RestApiException;
 import com.example.dorandroan.global.error.ChattingErrorCode;
+import com.example.dorandroan.global.error.MemberErrorCode;
 import com.example.dorandroan.global.jwt.CustomUserDetails;
-import com.example.dorandroan.repository.GroupChatRepository;
-import com.example.dorandroan.repository.GroupChatRoomRepository;
-import com.example.dorandroan.repository.MemberChatRoomRepository;
+import com.example.dorandroan.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -22,11 +22,12 @@ public class ChatRoomService {
 
     private final GroupChatRoomRepository groupChatRoomRepository;
     private final MemberChatRoomRepository memberChatRoomRepository;
+    private final PrivateChatroomRepository privateChatroomRepository;
     private final GroupChatRepository chatRepository;
     private final MemberService memberService;
 
     @Transactional
-    public Long createChatRoom(Member member, ChatRoomRequestDto requestDto) {
+    public Long createGroupChatroom(Member member, ChatRoomRequestDto requestDto) {
 
         GroupChatroom newChatRoom = GroupChatroom.builder().
                 title(requestDto.getChatRoomTitle())
@@ -68,12 +69,26 @@ public class ChatRoomService {
 
     public ProfileResponseDto getMemberProfile(Long memberId) {
 
-        return ProfileResponseDto.toDto(memberService.findMember(memberId));
+        Member findMember = memberService.findMember(memberId);
+        if (findMember.getState())
+            throw new RestApiException(MemberErrorCode.MEMBER_NOT_FOUND);
+        return ProfileResponseDto.toDto(findMember);
     }
 
     public List<RecommendMemberResponseDto> getRecommendMembers() {
 
         return memberService.getRecommendMembers().stream()
                 .map(RecommendMemberResponseDto::toDto).collect(Collectors.toList());
+    }
+
+    @Transactional
+    public Long createPrivateChatroom(CustomUserDetails member, Long memberId) {
+        if (member.getMember().getMemberId().equals(memberId) || memberService.findMember(memberId).getState())
+            throw new RestApiException(ChattingErrorCode.INVALID_MEMBER);
+
+        return privateChatroomRepository.save(
+                PrivateChatroom.builder()
+                .aId(member.getMember().getMemberId())
+                .bId(memberId).build()).getPrivateChatroomId();
     }
 }

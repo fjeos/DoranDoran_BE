@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -25,10 +26,10 @@ public class ChatRoomController {
     }
 
     @PostMapping("/chatrooms")
-    public ResponseEntity<Map<String, Long>> createChatRoom(@AuthenticationPrincipal CustomUserDetails member,
+    public ResponseEntity<Map<String, Long>> createGroupChatroom(@AuthenticationPrincipal CustomUserDetails member,
                                                             @Valid @RequestBody ChatRoomRequestDto requestDto) {
 
-        return ResponseEntity.ok(Map.of("chatRoomId", chatRoomService.createChatRoom(member.getMember(), requestDto)));
+        return ResponseEntity.ok(Map.of("chatRoomId", chatRoomService.createGroupChatroom(member.getMember(), requestDto)));
     }
 
     @GetMapping("/members")
@@ -44,6 +45,13 @@ public class ChatRoomController {
     @GetMapping("/recommends")
     public ResponseEntity<List<RecommendMemberResponseDto>> getRecommendMembers() {
         return ResponseEntity.ok(chatRoomService.getRecommendMembers());
+    }
+
+    @PostMapping("/private")
+    public ResponseEntity<Map<String, Long>> createPrivateChatroom(@AuthenticationPrincipal CustomUserDetails member,
+                                                                   @RequestBody Map<String, Long> requestDto) {
+        return ResponseEntity.ok(Map.of("chatRoomId",
+                chatRoomService.createPrivateChatroom(member, requestDto.get("memberId"))));
     }
 
 }

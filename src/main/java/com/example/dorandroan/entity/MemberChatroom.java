@@ -24,7 +24,7 @@ public class MemberChatroom {
     private ChatRoomRole role;
 
     @Column(nullable = false)
-    private Boolean quit;
+    private boolean quit;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "group_chatroom_id")

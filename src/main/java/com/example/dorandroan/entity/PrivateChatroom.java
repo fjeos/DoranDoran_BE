@@ -23,9 +23,9 @@ public class PrivateChatroom {
     private Long bId;
 
     @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
-    private Boolean aOut;
+    private boolean aOut;
 
     @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
-    private Boolean bOut;
+    private boolean bOut;
 
 }

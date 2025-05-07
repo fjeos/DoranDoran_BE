@@ -29,5 +29,5 @@ public class GroupChatroom {
     private String description;
 
     @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
-    private Boolean closed;
+    private boolean closed;
 }
