@@ -1,9 +1,6 @@
 package com.example.dorandroan.controller;
 
-import com.example.dorandroan.dto.ChatRoomListResponseDto;
-import com.example.dorandroan.dto.ChatRoomMembersResponseDto;
-import com.example.dorandroan.dto.ChatRoomRequestDto;
-import com.example.dorandroan.dto.ProfileResponseDto;
+import com.example.dorandroan.dto.*;
 import com.example.dorandroan.global.jwt.CustomUserDetails;
 import com.example.dorandroan.service.ChatRoomService;
 import jakarta.validation.Valid;
@@ -42,6 +39,11 @@ public class ChatRoomController {
     @GetMapping("/profile")
     public ResponseEntity<ProfileResponseDto> getMemberProfile(@RequestParam("id") Long memberId) {
         return ResponseEntity.ok(chatRoomService.getMemberProfile(memberId));
+    }
+
+    @GetMapping("/recommends")
+    public ResponseEntity<List<RecommendMemberResponseDto>> getRecommendMembers() {
+        return ResponseEntity.ok(chatRoomService.getRecommendMembers());
     }
 
 }

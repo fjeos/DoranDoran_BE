@@ -9,7 +9,7 @@ import lombok.*;
 @Table(name = "MEMBER_CHATROOM")
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class MemberChatRoom {
+public class MemberChatroom {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,7 +27,7 @@ public class MemberChatRoom {
     private Boolean quit;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "chatroom_id")
-    private ChatRoom chatRoom;
+    @JoinColumn(name = "group_chatroom_id")
+    private GroupChatroom groupChatroom;
 
 }
