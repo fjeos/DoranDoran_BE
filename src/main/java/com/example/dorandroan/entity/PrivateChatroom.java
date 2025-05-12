@@ -16,11 +16,13 @@ public class PrivateChatroom {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long privateChatroomId;
 
-    @Column
-    private Long aId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "a_member_id")
+    private Member memberA;
 
-    @Column
-    private Long bId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "b_member_id")
+    private Member memberB;
 
     @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
     private boolean aOut;
