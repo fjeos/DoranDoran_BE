@@ -12,6 +12,8 @@ public enum ChattingErrorCode implements ErrorCode {
     // 400 BAD REQUEST
     INVALID_MEMBER(HttpStatus.BAD_REQUEST, "해당 회원과 채팅을 시작할 수 없습니다."),
     ALREADY_JOINED(HttpStatus.BAD_REQUEST, "이미 입장한 채팅방입니다."),
+    ILLEGAL_PARAMETER(HttpStatus.BAD_REQUEST, "채팅방 ID가 존재하지 않습니다."),
+    NOT_PART_IN(HttpStatus.BAD_REQUEST, "참여중인 채팅방이 아닙니다."),
 
     // 404 NOT FOUND
     CHATROOM_NOT_FOUND(HttpStatus.NOT_FOUND, "채팅방을 찾을 수 없습니다."),

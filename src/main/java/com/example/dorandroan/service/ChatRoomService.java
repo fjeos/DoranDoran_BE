@@ -6,13 +6,14 @@ import com.example.dorandroan.global.RestApiException;
 import com.example.dorandroan.global.error.ChattingErrorCode;
 import com.example.dorandroan.global.error.MemberErrorCode;
 import com.example.dorandroan.global.jwt.CustomUserDetails;
+import com.example.dorandroan.global.jwt.CustomUserDetailsService;
 import com.example.dorandroan.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,6 +26,10 @@ public class ChatRoomService {
     private final PrivateChatroomRepository privateChatroomRepository;
     private final GroupChatRepository chatRepository;
     private final MemberService memberService;
+
+    private Member getNowMember(Long memberId) {
+        return memberService.findMember(memberId);
+    }
 
     @Transactional
     public Long createGroupChatroom(Member member, ChatRoomRequestDto requestDto) {
@@ -57,15 +62,31 @@ public class ChatRoomService {
     }
 
 
-    public List<ChatRoomMembersResponseDto> getChatRoomMembers(Long chatRoomId) {
+    public List<ChatRoomMembersResponseDto> getGroupChatRoomMembers(Member member, Long chatRoomId) {
 
-        List<ChatRoomMembersResponseDto> result = memberChatRoomRepository.findMemberByChatRoom(chatRoomId).stream()
-                .map(ChatRoomMembersResponseDto::toDto).toList();
-        if (result.isEmpty())
+        List<Member> memberByChatRoom = memberChatRoomRepository.findMemberByChatRoom(chatRoomId);
+        if (memberByChatRoom.isEmpty())
             throw new RestApiException(ChattingErrorCode.CHATROOM_NOT_FOUND);
 
-        return result;
+        if (memberByChatRoom.stream().noneMatch(m -> m.getMemberId().equals(member.getMemberId())))
+            throw new RestApiException(ChattingErrorCode.NOT_PART_IN);
+
+        return memberByChatRoom.stream()
+                .map(ChatRoomMembersResponseDto::toDto).toList();
     }
+
+    public List<ChatRoomMembersResponseDto> getPrivateChatRoomMembers(Long memberId, Long privateChatRoomId) {
+        Member nowMember = getNowMember(memberId);
+        PrivateChatroom privateChatroom = privateChatroomRepository.findById(privateChatRoomId)
+                .orElseThrow(() -> new RestApiException(ChattingErrorCode.CHATROOM_NOT_FOUND));
+
+        if (!(nowMember.equals(privateChatroom.getMemberA()) || nowMember.equals(privateChatroom.getMemberB())))
+            throw new RestApiException(ChattingErrorCode.NOT_PART_IN);
+
+        return List.of(ChatRoomMembersResponseDto.toDto(privateChatroom.getMemberA()),
+                ChatRoomMembersResponseDto.toDto(privateChatroom.getMemberB()));
+    }
+
 
     public ProfileResponseDto getMemberProfile(Long memberId) {
 
@@ -82,14 +103,16 @@ public class ChatRoomService {
     }
 
     @Transactional
-    public Long createPrivateChatroom(CustomUserDetails member, Long memberId) {
-        if (member.getMember().getMemberId().equals(memberId) || memberService.findMember(memberId).getState())
+    public Long createPrivateChatroom(Member member, Long otherMemberId) {
+        Member nowMember = getNowMember(member.getMemberId());
+        Member otherMember = memberService.findMember(otherMemberId);
+        if (nowMember.equals(otherMember) || nowMember.getState() || otherMember.getState())
             throw new RestApiException(ChattingErrorCode.INVALID_MEMBER);
 
         return privateChatroomRepository.save(
                 PrivateChatroom.builder()
-                .aId(member.getMember().getMemberId())
-                .bId(memberId).build()).getPrivateChatroomId();
+                .memberA(nowMember)
+                .memberB(otherMember).build()).getPrivateChatroomId();
     }
 
     @Transactional
