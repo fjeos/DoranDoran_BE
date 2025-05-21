@@ -15,6 +15,7 @@ import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -104,5 +105,15 @@ public class MemberService {
 
     public List<Member> getRecommendMembers() {
         return memberRepository.findByRecommends();
+    }
+
+    public long countRecommendMembers() {
+
+        return memberRepository.countRecommendMembers();
+    }
+
+    public List<Member> findRecommendedMembers() {
+
+        return memberRepository.findRecommendedMembers();
     }
 }

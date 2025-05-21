@@ -9,11 +9,14 @@ import com.example.dorandroan.global.jwt.CustomUserDetails;
 import com.example.dorandroan.global.jwt.CustomUserDetailsService;
 import com.example.dorandroan.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 @Service
@@ -98,7 +101,14 @@ public class ChatRoomService {
 
     public List<RecommendMemberResponseDto> getRecommendMembers() {
 
-        return memberService.getRecommendMembers().stream()
+//        long totalCount = memberService.countRecommendMembers();
+//        int idx = (int)(Math.random() * totalCount);
+//        int pageSize = 8;
+//        int maxPage = (int) Math.ceil((double) totalCount / pageSize);
+//
+//        int randomPage = new Random().nextInt(Math.max(maxPage, 1));
+//        Pageable pageable = PageRequest.of(randomPage, pageSize);
+        return memberService.findRecommendedMembers().stream()
                 .map(RecommendMemberResponseDto::toDto).collect(Collectors.toList());
     }
 
