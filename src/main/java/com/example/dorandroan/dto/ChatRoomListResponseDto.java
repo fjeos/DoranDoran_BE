@@ -1,7 +1,7 @@
 package com.example.dorandroan.dto;
 
-import com.example.dorandroan.entity.GroupChat;
-import com.example.dorandroan.entity.GroupChatroom;
+import com.example.dorandroan.entity.*;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -12,6 +12,8 @@ import java.time.format.DateTimeFormatter;
 @Builder
 public class ChatRoomListResponseDto {
     private Long chatRoomId;
+    @JsonProperty("isGroup")
+    private boolean group;
     private String chatRoomTitle;
     private int partInPeople;
     private String chatRoomImage;
@@ -19,18 +21,33 @@ public class ChatRoomListResponseDto {
     private String lastChatContent;
     private String lastChatTime;
 
-    public static ChatRoomListResponseDto toDto(GroupChatroom chatRoom, GroupChat lastChat) {
+    public static ChatRoomListResponseDto toDto(GroupChatroom chatRoom, Chat lastChat) {
+        boolean isChatNull = lastChat == null;
         return ChatRoomListResponseDto.builder()
                 .chatRoomId(chatRoom.getGroupChatroomId())
+                .group(true)
                 .chatRoomTitle(chatRoom.getTitle())
                 .partInPeople(chatRoom.getMaxPartIn())
                 .chatRoomImage(chatRoom.getChatRoomImg())
-                .nonReadCount(0)
-                .lastChatContent(lastChat.getContent())
-                .lastChatTime(changeDateToString(lastChat))
+                .nonReadCount(isChatNull? 0 : 1)
+                .lastChatContent(isChatNull? null : lastChat.getContent())
+                .lastChatTime(isChatNull? null : changeDateToString(lastChat))
                 .build();
     }
-    private static String changeDateToString(GroupChat chat) {
+    public static ChatRoomListResponseDto toPrivateDto(PrivateChatroom chatRoom, Chat lastChat, Member otherMember) {
+        boolean isChatNull = lastChat == null;
+        return ChatRoomListResponseDto.builder()
+                .chatRoomId(chatRoom.getPrivateChatroomId())
+                .group(false)
+                .chatRoomTitle(otherMember.getNickname())
+                .partInPeople(2)
+                .chatRoomImage(otherMember.getProfileImg())
+                .nonReadCount(isChatNull? 0 : 1)
+                .lastChatContent(isChatNull? null : lastChat.getContent())
+                .lastChatTime(isChatNull? null : changeDateToString(lastChat))
+                .build();
+    }
+    private static String changeDateToString(Chat chat) {
         if (chat.getSendAt().toLocalDate().isEqual(LocalDate.now())) {
             return chat.getSendAt().format(DateTimeFormatter.ofPattern("a hh:mm"));
         } else {

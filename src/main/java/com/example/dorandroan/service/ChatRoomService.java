@@ -15,6 +15,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -53,15 +54,22 @@ public class ChatRoomService {
     }
 
     public List<ChatRoomListResponseDto> getChatRoomLists(CustomUserDetails member) {
+        List<ChatRoomListResponseDto> responseDto = new ArrayList<>();
 
-        List<GroupChatroom> chatRoomList = memberChatRoomRepository.findChatRoomByMember(member.getMember());
-        if (chatRoomList.isEmpty())
-            throw new RestApiException(ChattingErrorCode.CHATROOM_NOT_FOUND);
+        List<GroupChatroom> groupList = memberChatRoomRepository.findChatRoomByMember(member.getMember());
+        for (GroupChatroom groupChatroom : groupList) {
+            responseDto.add(ChatRoomListResponseDto.toDto(groupChatroom,
+                    chatRepository.findTopByChatRoomIdOrderBySendAtDesc(groupChatroom.getGroupChatroomId())));
+        }
+        List<PrivateChatroom> privateList = privateChatroomRepository.findChatroomByMember(member.getMember());
+        for (PrivateChatroom privateChatroom : privateList) {
+            responseDto.add(ChatRoomListResponseDto.toPrivateDto(privateChatroom,
+                    chatRepository.findTopByChatRoomIdOrderBySendAtDesc(privateChatroom.getPrivateChatroomId()),
+                    privateChatroom.getMemberA().equals(member.getMember())?
+                            privateChatroom.getMemberB() : privateChatroom.getMemberA()));
+        }
 
-        return  chatRoomList.stream().map(
-                c -> ChatRoomListResponseDto.toDto(c,
-                        chatRepository.findTopByChatRoomIdOrderBySendAtDesc(c.getGroupChatroomId()))
-        ).collect(Collectors.toList());
+        return  responseDto;
     }
 
 
