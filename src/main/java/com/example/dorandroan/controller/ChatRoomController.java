@@ -71,4 +71,16 @@ public class ChatRoomController {
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping("/chats")
+    public ResponseEntity<List<ChatResponseDto>> getChats(@RequestParam(value = "groupId", required = false) Long groupId,
+                                                                              @RequestParam(value = "privateId", required = false) Long privateId,
+                                                                              @RequestParam(value = "key", required = false) String key) {
+        if (groupId == null) {
+            return ResponseEntity.ok(chatRoomService.getPrivateChats(privateId, key));
+        } else if (privateId == null) {
+            return ResponseEntity.ok(chatRoomService.getGroupChats(groupId, key));
+        } else {
+            throw new RestApiException(ChattingErrorCode.ILLEGAL_PARAMETER);
+        }
+    }
 }

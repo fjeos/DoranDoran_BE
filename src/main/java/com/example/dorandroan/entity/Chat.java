@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import org.bson.types.ObjectId;
 
 import java.time.LocalDateTime;
 
@@ -19,5 +20,5 @@ public abstract class Chat {
     String type;
     LocalDateTime sendAt;
 
-    public abstract String getChatId();
+    public abstract ObjectId getChatId();
 }

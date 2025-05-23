@@ -6,18 +6,17 @@ import com.example.dorandroan.global.RestApiException;
 import com.example.dorandroan.global.error.ChattingErrorCode;
 import com.example.dorandroan.global.error.MemberErrorCode;
 import com.example.dorandroan.global.jwt.CustomUserDetails;
-import com.example.dorandroan.global.jwt.CustomUserDetailsService;
 import com.example.dorandroan.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.bson.types.ObjectId;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,7 +27,8 @@ public class ChatRoomService {
     private final GroupChatRoomRepository groupChatRoomRepository;
     private final MemberChatRoomRepository memberChatRoomRepository;
     private final PrivateChatroomRepository privateChatroomRepository;
-    private final GroupChatRepository chatRepository;
+    private final GroupChatRepository groupChatRepository;
+    private final PrivateChatRepository privateChatRepository;
     private final MemberService memberService;
 
     private Member getNowMember(Long memberId) {
@@ -59,12 +59,12 @@ public class ChatRoomService {
         List<GroupChatroom> groupList = memberChatRoomRepository.findChatRoomByMember(member.getMember());
         for (GroupChatroom groupChatroom : groupList) {
             responseDto.add(ChatRoomListResponseDto.toDto(groupChatroom,
-                    chatRepository.findTopByChatRoomIdOrderBySendAtDesc(groupChatroom.getGroupChatroomId())));
+                    groupChatRepository.findTopByChatRoomIdOrderBySendAtDesc(groupChatroom.getGroupChatroomId())));
         }
         List<PrivateChatroom> privateList = privateChatroomRepository.findChatroomByMember(member.getMember());
         for (PrivateChatroom privateChatroom : privateList) {
             responseDto.add(ChatRoomListResponseDto.toPrivateDto(privateChatroom,
-                    chatRepository.findTopByChatRoomIdOrderBySendAtDesc(privateChatroom.getPrivateChatroomId()),
+                    privateChatRepository.findTopByChatRoomIdOrderBySendAtDesc(privateChatroom.getPrivateChatroomId()),
                     privateChatroom.getMemberA().equals(member.getMember())?
                             privateChatroom.getMemberB() : privateChatroom.getMemberA()));
         }
@@ -139,7 +139,6 @@ public class ChatRoomService {
         GroupChatroom groupChatroom = groupChatRoomRepository.findById(chatRoomId)
                 .orElseThrow(() -> new RestApiException(ChattingErrorCode.CHATROOM_NOT_FOUND));
 
-        System.out.println("Now Member  " + member.getMember().getMemberId());
         if (memberChatRoomRepository.existsByMember_MemberIdAndGroupChatroom_GroupChatroomId(
                 member.getMember().getMemberId(), chatRoomId))
             throw new RestApiException(ChattingErrorCode.ALREADY_JOINED);
@@ -148,5 +147,33 @@ public class ChatRoomService {
                 .groupChatroom(groupChatroom)
                 .member(memberService.findMember(member.getMember().getMemberId()))
                 .role(ChatRoomRole.PART).build());
+    }
+
+    public List<ChatResponseDto> getGroupChats(Long chatRoomId, String key) {
+        return getChatResponseDto(chatRoomId, key, true);
+    }
+
+
+    public List<ChatResponseDto> getPrivateChats(Long privateId, String key) {
+        return getChatResponseDto(privateId, key, false);
+    }
+    private List<ChatResponseDto> getChatResponseDto(Long chatRoomId, String key, boolean isGroup) {
+        Pageable pageable = PageRequest.of(0, 30, Sort.by(Sort.Direction.DESC, "id"));
+        List<Chat> result;
+        if (key != null) {
+            ObjectId lastId = new ObjectId(key);
+            if (isGroup)
+                result = groupChatRepository.findByChatRoomIdAndIdLessThanOrderByIdDesc(chatRoomId, lastId, pageable);
+            else
+                result = privateChatRepository.findByChatRoomIdAndIdLessThanOrderByIdDesc(chatRoomId, lastId, pageable);
+
+        } else {
+            if (isGroup)
+                result = groupChatRepository.findByChatRoomIdOrderByIdDesc(chatRoomId, pageable);
+            else
+                result = privateChatRepository.findByChatRoomIdOrderByIdDesc(chatRoomId, pageable);
+        }
+        return result.stream()
+                .map(c -> ChatResponseDto.toDto(c, memberService.findMember(c.getSenderId()))).collect(Collectors.toList());
     }
 }
