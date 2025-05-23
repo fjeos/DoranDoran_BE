@@ -5,6 +5,7 @@ import com.example.dorandroan.entity.GroupChat;
 import com.example.dorandroan.entity.Member;
 import lombok.Builder;
 import lombok.Getter;
+import org.bson.types.ObjectId;
 
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
@@ -24,7 +25,7 @@ public class ChatResponseDto {
 
     public static ChatResponseDto toDto(Chat chat, Member member) {
         return ChatResponseDto.builder()
-                .chatId(chat.getChatId())
+                .chatId(chat.getChatId().toHexString())
                 .type(chat.getType())
                 .content(chat.getContent())
                 .senderId(member.getMemberId())
