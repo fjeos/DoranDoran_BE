@@ -43,6 +43,7 @@ public class ChatRoomService {
                 .chatRoomImg(requestDto.getChatRoomImage())
                 .description(requestDto.getDescription())
                 .maxPartIn(requestDto.getMaxCount())
+                .nowPartIn(1)
                 .closed(false)
                 .build();
         groupChatRoomRepository.save(newChatRoom);
@@ -124,7 +125,7 @@ public class ChatRoomService {
     public Long createPrivateChatroom(Member member, Long otherMemberId) {
         Member nowMember = getNowMember(member.getMemberId());
         Member otherMember = memberService.findMember(otherMemberId);
-        if (nowMember.equals(otherMember) || nowMember.getState() || otherMember.getState())
+        if (nowMember.equals(otherMember) || nowMember.getState() || otherMember.getState() || !otherMember.getRecommends())
             throw new RestApiException(ChattingErrorCode.INVALID_MEMBER);
 
         return privateChatroomRepository.save(
@@ -143,10 +144,14 @@ public class ChatRoomService {
                 member.getMember().getMemberId(), chatRoomId))
             throw new RestApiException(ChattingErrorCode.ALREADY_JOINED);
 
+        if (groupChatroom.getMaxPartIn() >= groupChatroom.getNowPartIn())
+            throw new RestApiException(ChattingErrorCode.FULL_CHATROOM);
+
         memberChatRoomRepository.save(MemberChatroom.builder()
                 .groupChatroom(groupChatroom)
                 .member(memberService.findMember(member.getMember().getMemberId()))
                 .role(ChatRoomRole.PART).build());
+        groupChatroom.enterRoom();
     }
 
     public List<ChatResponseDto> getGroupChats(Long chatRoomId, String key) {
@@ -175,5 +180,16 @@ public class ChatRoomService {
         }
         return result.stream()
                 .map(c -> ChatResponseDto.toDto(c, memberService.findMember(c.getSenderId()))).collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void changeRoomTitle(Member member, ChatRoomTitleUpdateDto requestDto) {
+        MemberChatroom chatroom = memberChatRoomRepository.findChatRoomByMemberAndChatRoomId(member, requestDto.getChatRoomId())
+                .orElseThrow(() -> new RestApiException(ChattingErrorCode.CHATROOM_NOT_FOUND));
+        if (!chatroom.getRole().equals(ChatRoomRole.LEAD))
+            throw new RestApiException(ChattingErrorCode.NOT_LEAD);
+        if (chatroom.getGroupChatroom().isClosed())
+            throw new RestApiException(ChattingErrorCode.ALREADY_CLOSED);
+        chatroom.getGroupChatroom().changeTitle(requestDto.getChatRoomTitle());
     }
 }

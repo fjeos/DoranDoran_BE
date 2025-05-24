@@ -83,4 +83,11 @@ public class ChatRoomController {
             throw new RestApiException(ChattingErrorCode.ILLEGAL_PARAMETER);
         }
     }
+
+    @PatchMapping("/info/title")
+    public ResponseEntity<Void> changeRoomTitle(@AuthenticationPrincipal CustomUserDetails member,
+                                                @Valid @RequestBody ChatRoomTitleUpdateDto requestDto) {
+        chatRoomService.changeRoomTitle(member.getMember(), requestDto);
+        return ResponseEntity.ok().build();
+    }
 }

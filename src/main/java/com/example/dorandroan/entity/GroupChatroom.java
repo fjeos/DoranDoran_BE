@@ -23,6 +23,9 @@ public class GroupChatroom {
     private Integer maxPartIn;
 
     @Column
+    private Integer nowPartIn;
+
+    @Column
     private String chatRoomImg;
 
     @Column
@@ -30,4 +33,13 @@ public class GroupChatroom {
 
     @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
     private boolean closed;
+
+    public void enterRoom() {
+        if (this.nowPartIn < this.maxPartIn)
+            this.nowPartIn++;
+    }
+
+    public void changeTitle(String title) {
+        this.title = title;
+    }
 }
