@@ -39,7 +39,7 @@ public class ChatService {
                 .type(chatDto.getType())
                 .sendAt(LocalDateTime.now())
                 .build());
-        template.convertAndSend("/chatRoom/group/" + roomId, ChatResponseDto.toDto(newChat, sender));
+        template.convertAndSend("/group/" + roomId, ChatResponseDto.toDto(newChat, sender));
     }
 
     @Transactional
@@ -53,7 +53,7 @@ public class ChatService {
                 .type(chatDto.getType())
                 .sendAt(LocalDateTime.now())
                 .build());
-        template.convertAndSend("/chatRoom/private/" + roomId, ChatResponseDto.toDto(newChat, sender));
+        template.convertAndSend("/private/" + roomId, ChatResponseDto.toDto(newChat, sender));
     }
 
 
