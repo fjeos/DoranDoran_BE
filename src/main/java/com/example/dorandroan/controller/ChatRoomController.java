@@ -26,6 +26,12 @@ public class ChatRoomController {
         return ResponseEntity.ok(chatRoomService.getChatRoomLists(member));
     }
 
+    @GetMapping("/chatrooms")
+    public ResponseEntity<ChatroomInfoResponseDto> getGroupChatroomInfo(@AuthenticationPrincipal CustomUserDetails member,
+                                                     @RequestParam("id") Long chatRoomId) {
+        return ResponseEntity.ok(chatRoomService.getGroupChatroomInfo(member.getMember(), chatRoomId));
+    }
+
     @PostMapping("/chatrooms")
     public ResponseEntity<Map<String, Long>> createGroupChatroom(@AuthenticationPrincipal CustomUserDetails member,
                                                                  @Valid @RequestBody ChatRoomRequestDto requestDto) {
