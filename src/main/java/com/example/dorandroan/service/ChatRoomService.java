@@ -239,4 +239,10 @@ public class ChatRoomService {
                 chatroom.outB();
         }
     }
+
+    public ChatroomInfoResponseDto getGroupChatroomInfo(Member member, Long chatRoomId) {
+        MemberChatroom chatroom = memberChatRoomRepository.findChatRoomByMemberAndChatRoomIdAndNotClosed(member, chatRoomId)
+                .orElseThrow(() -> new RestApiException(ChattingErrorCode.CHATROOM_NOT_FOUND));
+        return ChatroomInfoResponseDto.toDto(chatroom.getGroupChatroom(), chatroom.getRole().equals(ChatRoomRole.LEAD));
+    }
 }
