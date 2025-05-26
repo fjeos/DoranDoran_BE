@@ -17,6 +17,7 @@ public enum ChattingErrorCode implements ErrorCode {
     FULL_CHATROOM(HttpStatus.BAD_REQUEST, "채팅방에 더이상 참여할 수 없습니다."),
     ALREADY_CLOSED(HttpStatus.BAD_REQUEST, "폐쇄된 채팅방입니다."),
     NOT_LEAD(HttpStatus.BAD_REQUEST, "권한이 없습니다."),
+    LESS_THAN_NOW(HttpStatus.BAD_REQUEST, "현재 참여 인원보다 작게 설정할 수 없습니다."),
 
     // 404 NOT FOUND
     CHATROOM_NOT_FOUND(HttpStatus.NOT_FOUND, "채팅방을 찾을 수 없습니다."),

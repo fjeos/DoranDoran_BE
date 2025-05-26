@@ -12,6 +12,7 @@ import org.bson.types.ObjectId;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -184,12 +185,58 @@ public class ChatRoomService {
 
     @Transactional
     public void changeRoomTitle(Member member, ChatRoomTitleUpdateDto requestDto) {
-        MemberChatroom chatroom = memberChatRoomRepository.findChatRoomByMemberAndChatRoomId(member, requestDto.getChatRoomId())
+        getMemberChatroomForUpdate(member, requestDto.getChatRoomId())
+                .changeTitle(requestDto.getChatRoomTitle());
+    }
+
+    @Transactional
+    public void changeRoomImage(Member member, ChatRoomImageUpdateDto requestDto) {
+        getMemberChatroomForUpdate(member, requestDto.getChatRoomId())
+                .changeRoomImage(requestDto.getChatRoomImage());
+    }
+
+    @Transactional
+    public void changeRoomMaxCount(Member member, ChatRoomMaxUpdateDto requestDto) {
+        GroupChatroom chatroom = getMemberChatroomForUpdate(member, requestDto.getChatRoomId());
+        if (requestDto.getMaxCount() < chatroom.getNowPartIn())
+            throw new RestApiException(ChattingErrorCode.LESS_THAN_NOW);
+        chatroom.changeMaxCount(requestDto.getMaxCount());
+    }
+    @Transactional
+    public void changeRoomDescription(Member member, ChatRoomDescriptionUpdateDto requestDto) {
+        getMemberChatroomForUpdate(member, requestDto.getChatRoomId())
+                .changeDescription(requestDto.getDescription());
+    }
+    @Transactional
+    public void deleteGroupChatRoom(Member member, Long chatRoomId) {
+        getMemberChatroomForUpdate(member, chatRoomId).delete();
+    }
+
+    private GroupChatroom getMemberChatroomForUpdate(Member member, Long chatRoomId) {
+        MemberChatroom chatroom = memberChatRoomRepository.findChatRoomByMemberAndChatRoomIdAndNotClosed(member, chatRoomId)
                 .orElseThrow(() -> new RestApiException(ChattingErrorCode.CHATROOM_NOT_FOUND));
         if (!chatroom.getRole().equals(ChatRoomRole.LEAD))
             throw new RestApiException(ChattingErrorCode.NOT_LEAD);
         if (chatroom.getGroupChatroom().isClosed())
             throw new RestApiException(ChattingErrorCode.ALREADY_CLOSED);
-        chatroom.getGroupChatroom().changeTitle(requestDto.getChatRoomTitle());
+        return chatroom.getGroupChatroom();
+    }
+
+    @Transactional
+    public void outOfPrivateChatRoom(Member member, Long privateId) {
+        PrivateChatroom chatroom = privateChatroomRepository.findChatroomByMemberAndNotQuit(member, privateId)
+                .orElseThrow(() -> new RestApiException(ChattingErrorCode.NOT_PART_IN));
+
+        if (chatroom.getMemberA().equals(member)) {
+            if (chatroom.isAOut())
+                throw new RestApiException(ChattingErrorCode.NOT_PART_IN);
+            else
+                chatroom.outA();
+        } else {
+            if (chatroom.isBOut())
+                throw new RestApiException(ChattingErrorCode.NOT_PART_IN);
+            else
+                chatroom.outB();
+        }
     }
 }
