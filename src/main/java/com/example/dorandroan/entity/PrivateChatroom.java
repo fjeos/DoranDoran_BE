@@ -30,4 +30,12 @@ public class PrivateChatroom {
     @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
     private boolean bOut;
 
+    public void outA() {
+        this.aOut = true;
+    }
+
+    public void outB() {
+        this.bOut = true;
+    }
+
 }

@@ -42,4 +42,20 @@ public class GroupChatroom {
     public void changeTitle(String title) {
         this.title = title;
     }
+
+    public void changeRoomImage(String chatRoomImage) {
+        this.chatRoomImg = chatRoomImage;
+    }
+
+    public void changeMaxCount(Integer maxCount) {
+        this.maxPartIn = maxCount;
+    }
+
+    public void changeDescription(String description) {
+        this.description = description;
+    }
+
+    public void delete() {
+        this.closed = true;
+    }
 }
