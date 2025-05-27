@@ -11,6 +11,7 @@ import com.example.dorandroan.repository.GroupChatRepository;
 import com.example.dorandroan.repository.GroupChatRoomRepository;
 import com.example.dorandroan.repository.PrivateChatRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -26,10 +28,10 @@ public class ChatService {
     private final GroupChatRepository groupChatRepository;
     private final PrivateChatRepository privateChatRepository;
     private final SimpMessagingTemplate template;
-    private final GroupChatRoomRepository chatRoomRepository;
 
     @Transactional
     public void sendGroupMessage(Long roomId, Long memberId, ChatDto chatDto) {
+        log.info("Inner Service");
         Member sender = memberService.findMember(memberId);
 
         GroupChat newChat = groupChatRepository.save(GroupChat.builder().senderId(sender.getMemberId())
@@ -39,6 +41,7 @@ public class ChatService {
                 .type(chatDto.getType())
                 .sendAt(LocalDateTime.now())
                 .build());
+        log.info("DTO Built");
         template.convertAndSend("/group/" + roomId, ChatResponseDto.toDto(newChat, sender));
     }
 
