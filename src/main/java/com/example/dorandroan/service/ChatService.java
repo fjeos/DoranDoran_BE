@@ -42,7 +42,7 @@ public class ChatService {
                 .sendAt(LocalDateTime.now())
                 .build());
         log.info("DTO Built");
-        template.convertAndSend("/group/" + roomId, ChatResponseDto.toDto(newChat, sender));
+        template.convertAndSend("/sub/group/" + roomId, ChatResponseDto.toDto(newChat, sender));
     }
 
     @Transactional
@@ -56,7 +56,7 @@ public class ChatService {
                 .type(chatDto.getType())
                 .sendAt(LocalDateTime.now())
                 .build());
-        template.convertAndSend("/private/" + roomId, ChatResponseDto.toDto(newChat, sender));
+        template.convertAndSend("/sub/private/" + roomId, ChatResponseDto.toDto(newChat, sender));
     }
 
 
