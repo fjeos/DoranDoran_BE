@@ -163,7 +163,7 @@ public class ChatRoomService {
         return getChatResponseDto(privateId, key, false);
     }
     private List<ChatResponseDto> getChatResponseDto(Long chatRoomId, String key, boolean isGroup) {
-        Pageable pageable = PageRequest.of(0, 30, Sort.by(Sort.Direction.DESC, "id"));
+        Pageable pageable = PageRequest.of(0, 30, Sort.by(Sort.Direction.ASC, "id"));
         List<Chat> result;
         if (key != null) {
             ObjectId lastId = new ObjectId(key);
