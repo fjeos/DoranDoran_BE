@@ -12,7 +12,6 @@ import org.bson.types.ObjectId;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -169,15 +168,15 @@ public class ChatRoomService {
         if (key != null) {
             ObjectId lastId = new ObjectId(key);
             if (isGroup)
-                result = groupChatRepository.findByChatRoomIdAndIdLessThanOrderByIdDesc(chatRoomId, lastId, pageable);
+                result = groupChatRepository.findByChatRoomIdAndIdLessThanOrderById(chatRoomId, lastId, pageable);
             else
-                result = privateChatRepository.findByChatRoomIdAndIdLessThanOrderByIdDesc(chatRoomId, lastId, pageable);
+                result = privateChatRepository.findByChatRoomIdAndIdLessThanOrderById(chatRoomId, lastId, pageable);
 
         } else {
             if (isGroup)
-                result = groupChatRepository.findByChatRoomIdOrderByIdDesc(chatRoomId, pageable);
+                result = groupChatRepository.findByChatRoomIdOrderById(chatRoomId, pageable);
             else
-                result = privateChatRepository.findByChatRoomIdOrderByIdDesc(chatRoomId, pageable);
+                result = privateChatRepository.findByChatRoomIdOrderById(chatRoomId, pageable);
         }
         return result.stream()
                 .map(c -> ChatResponseDto.toDto(c, memberService.findMember(c.getSenderId()))).collect(Collectors.toList());

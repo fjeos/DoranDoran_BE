@@ -1,6 +1,5 @@
 package com.example.dorandroan.repository;
 
-import com.example.dorandroan.dto.ChatResponseDto;
 import com.example.dorandroan.entity.Chat;
 import com.example.dorandroan.entity.GroupChat;
 import org.bson.types.ObjectId;
@@ -17,7 +16,7 @@ public interface GroupChatRepository extends MongoRepository<GroupChat, String> 
 
     GroupChat findTopByChatRoomIdOrderBySendAtDesc(Long chatRoomId);
 
-    List<Chat> findByChatRoomIdAndIdLessThanOrderByIdDesc(Long chatRoomId, ObjectId lastId, Pageable pageable);
+    List<Chat> findByChatRoomIdAndIdLessThanOrderById(Long chatRoomId, ObjectId lastId, Pageable pageable);
 
-    List<Chat> findByChatRoomIdOrderByIdDesc(Long chatRoomId, Pageable pageable);
+    List<Chat> findByChatRoomIdOrderById(Long chatRoomId, Pageable pageable);
 }
