@@ -69,7 +69,6 @@ public class ChatRoomService {
                     privateChatroom.getMemberA().equals(member.getMember())?
                             privateChatroom.getMemberB() : privateChatroom.getMemberA()));
         }
-        //responseDto.sort((a, b) -> b.getSendAt().compareTo(a.getSendAt()));
 
         return  responseDto;
     }

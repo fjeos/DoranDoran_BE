@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
 @Getter
@@ -17,6 +18,8 @@ public class ChatRoomListResponseDto {
     private String chatRoomTitle;
     private int partInPeople;
     private String chatRoomImage;
+    @JsonProperty("isClosed")
+    private boolean closed;
     private int nonReadCount;
     private String lastChatContent;
     private String lastChatTime;
@@ -29,6 +32,7 @@ public class ChatRoomListResponseDto {
                 .chatRoomTitle(chatRoom.getTitle())
                 .partInPeople(chatRoom.getMaxPartIn())
                 .chatRoomImage(chatRoom.getChatRoomImg())
+                .closed(chatRoom.isClosed())
                 .nonReadCount(isChatNull? 0 : 1)
                 .lastChatContent(isChatNull? null : lastChat.getContent())
                 .lastChatTime(isChatNull? null : changeDateToString(lastChat))
@@ -42,6 +46,7 @@ public class ChatRoomListResponseDto {
                 .chatRoomTitle(otherMember.getNickname())
                 .partInPeople(2)
                 .chatRoomImage(otherMember.getProfileImg())
+                .closed(false)
                 .nonReadCount(isChatNull? 0 : 1)
                 .lastChatContent(isChatNull? null : lastChat.getContent())
                 .lastChatTime(isChatNull? null : changeDateToString(lastChat))
@@ -49,9 +54,9 @@ public class ChatRoomListResponseDto {
     }
     private static String changeDateToString(Chat chat) {
         if (chat.getSendAt().toLocalDate().isEqual(LocalDate.now())) {
-            return chat.getSendAt().format(DateTimeFormatter.ofPattern("a hh:mm"));
+            return chat.getSendAt().atZone(ZoneId.of("Asia/Seoul")).format(DateTimeFormatter.ofPattern("a hh:mm"));
         } else {
-            return chat.getSendAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+            return chat.getSendAt().atZone(ZoneId.of("Asia/Seoul")).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
         }
     }
 }
