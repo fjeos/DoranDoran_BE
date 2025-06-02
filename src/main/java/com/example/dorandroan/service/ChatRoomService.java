@@ -12,6 +12,7 @@ import org.bson.types.ObjectId;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,7 +31,7 @@ public class ChatRoomService {
     private final GroupChatRepository groupChatRepository;
     private final PrivateChatRepository privateChatRepository;
     private final MemberService memberService;
-
+    private final ChatService chatService;
     private Member getNowMember(Long memberId) {
         return memberService.findMember(memberId);
     }
@@ -38,19 +39,20 @@ public class ChatRoomService {
     @Transactional
     public Long createGroupChatroom(Member member, ChatRoomRequestDto requestDto) {
 
-        GroupChatroom newChatRoom = GroupChatroom.builder().
+        GroupChatroom newChatRoom = groupChatRoomRepository.save(GroupChatroom.builder().
                 title(requestDto.getChatRoomTitle())
                 .chatRoomImg(requestDto.getChatRoomImage())
                 .description(requestDto.getDescription())
                 .maxPartIn(requestDto.getMaxCount())
                 .nowPartIn(1)
                 .closed(false)
-                .build();
-        groupChatRoomRepository.save(newChatRoom);
+                .build());
         memberChatRoomRepository.save(MemberChatroom.builder().member(member)
                 .role(ChatRoomRole.LEAD)
                 .quit(false)
                 .groupChatroom(newChatRoom).build());
+
+        chatService.sendSystemMessage(newChatRoom.getGroupChatroomId(), true, "채팅방이 생성되었습니다.");
         return newChatRoom.getGroupChatroomId();
     }
 
@@ -64,11 +66,19 @@ public class ChatRoomService {
         }
         List<PrivateChatroom> privateList = privateChatroomRepository.findChatroomByMember(member.getMember());
         for (PrivateChatroom privateChatroom : privateList) {
-            responseDto.add(ChatRoomListResponseDto.toPrivateDto(privateChatroom,
-                    privateChatRepository.findTopByChatRoomIdOrderBySendAtDesc(privateChatroom.getPrivateChatroomId()),
-                    privateChatroom.getMemberA().equals(member.getMember())?
-                            privateChatroom.getMemberB() : privateChatroom.getMemberA()));
+            PrivateChat lastChat = privateChatRepository.findTopByChatRoomIdOrderBySendAtDesc(privateChatroom.getPrivateChatroomId());
+            if (lastChat == null)
+                continue;
+            responseDto.add(ChatRoomListResponseDto.toPrivateDto(privateChatroom, lastChat,
+                    privateChatroom.getMemberA().equals(member.getMember())? privateChatroom.getMemberB() : privateChatroom.getMemberA()));
         }
+
+        responseDto.sort((a, b) -> {
+            if (a.getLastChatTime() == null && b.getLastChatTime() == null) return 0;
+            if (a.getLastChatTime() == null) return 1;
+            if (b.getLastChatTime() == null) return -1;
+            return b.getLastChatTime().compareTo(a.getLastChatTime());
+        });
 
         return  responseDto;
     }
