@@ -2,15 +2,19 @@ package com.example.dorandroan.global;
 
 import com.example.dorandroan.global.error.ChattingErrorCode;
 import com.example.dorandroan.global.jwt.JwtUtil;
-import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
+import reactor.core.publisher.Mono;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 @Component
@@ -32,10 +36,9 @@ public class WebSocketAuthInterceptor implements HandshakeInterceptor {
                 return true;
             }
         }
-        throw new RestApiException(ChattingErrorCode.HANDSHAKE_ERROR);
-        //return false;
+        ///setErrorResponse(response, ChattingErrorCode.HANDSHAKE_ERROR);
+        return false;
     }
-
     @Override
     public void afterHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler, Exception exception) {
 
