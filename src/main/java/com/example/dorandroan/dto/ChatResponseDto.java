@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Getter;
 import org.bson.types.ObjectId;
 
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
@@ -31,8 +32,10 @@ public class ChatResponseDto {
                 .senderId(member.getMemberId())
                 .senderNickname(member.getNickname())
                 .senderProfileImage(member.getProfileImg())
-                .date(chat.getSendAt().format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일")))
-                .time(chat.getSendAt().format(DateTimeFormatter.ofPattern("a hh:mm").withLocale(Locale.KOREAN)))
+                .date(chat.getSendAt().atZone(ZoneId.of("Asia/Seoul"))
+                        .format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일")))
+                .time(chat.getSendAt().atZone(ZoneId.of("Asia/Seoul"))
+                        .format(DateTimeFormatter.ofPattern("a hh:mm").withLocale(Locale.KOREAN)))
                 .build();
     }
 }
