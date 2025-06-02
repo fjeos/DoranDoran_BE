@@ -2,9 +2,7 @@ package com.example.dorandroan.service;
 
 import com.example.dorandroan.dto.ChatDto;
 import com.example.dorandroan.dto.ChatResponseDto;
-import com.example.dorandroan.entity.GroupChat;
-import com.example.dorandroan.entity.Member;
-import com.example.dorandroan.entity.PrivateChat;
+import com.example.dorandroan.entity.*;
 import com.example.dorandroan.global.RestApiException;
 import com.example.dorandroan.global.error.MemberErrorCode;
 import com.example.dorandroan.repository.GroupChatRepository;
@@ -17,6 +15,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 import java.util.UUID;
 
 @Slf4j
@@ -31,7 +32,6 @@ public class ChatService {
 
     @Transactional
     public void sendGroupMessage(Long roomId, Long memberId, ChatDto chatDto) {
-        log.info("Inner Service");
         Member sender = memberService.findMember(memberId);
 
         GroupChat newChat = groupChatRepository.save(GroupChat.builder().senderId(sender.getMemberId())
@@ -41,8 +41,23 @@ public class ChatService {
                 .type(chatDto.getType())
                 .sendAt(LocalDateTime.now())
                 .build());
-        log.info("DTO Built");
         template.convertAndSend("/sub/group/" + roomId, ChatResponseDto.toDto(newChat, sender));
+    }
+
+    @Transactional
+    public void sendSystemMessage(Long roomId, boolean isGroup, String message) {
+        ChatResponseDto systemChat;
+        if (isGroup) {
+            systemChat = ChatResponseDto.toDto(groupChatRepository.save(GroupChat.builder()
+                    .senderId(-1L).groupChatId(UUID.randomUUID().toString())
+                    .chatRoomId(roomId).content(message).type("system").sendAt(LocalDateTime.now()).build()), null);
+        } else {
+            systemChat = ChatResponseDto.toDto(privateChatRepository.save(PrivateChat.builder().chatRoomId(roomId)
+                    .privateChatId(UUID.randomUUID().toString())
+                    .type("system").senderId(-1L).sendAt(LocalDateTime.now()).build()), null);
+        }
+        String destination = isGroup? "group" : "private";
+        template.convertAndSend("/sub/" + destination + "/" + roomId, systemChat);
     }
 
     @Transactional
