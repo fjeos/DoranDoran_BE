@@ -133,7 +133,7 @@ public class ChatRoomController {
             chatRoomService.outOfPrivateChatRoom(member.getMember(), privateId);
             return ResponseEntity.ok().build();
         } else if (privateId == null) {
-            chatRoomService.outOfPrivateChatRoom(member.getMember(), groupId);
+            chatRoomService.outOfGroupChatRoom(member.getMember(), groupId);
             return ResponseEntity.ok().build();
         } else {
             throw new RestApiException(ChattingErrorCode.ILLEGAL_PARAMETER);
