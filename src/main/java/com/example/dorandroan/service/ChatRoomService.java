@@ -249,6 +249,15 @@ public class ChatRoomService {
         }
     }
 
+    @Transactional
+    public void outOfGroupChatRoom(Member member, Long groupId) {
+        MemberChatroom chatroom = memberChatRoomRepository.findChatRoomByMemberAndChatRoomId(member, groupId)
+                .orElseThrow(() -> new RestApiException(ChattingErrorCode.CHATROOM_NOT_FOUND));
+        if (chatroom.isQuit())
+            throw new RestApiException(ChattingErrorCode.NOT_PART_IN);
+        chatroom.out();
+    }
+
     public ChatroomInfoResponseDto getGroupChatroomInfo(Member member, Long chatRoomId) {
         MemberChatroom chatroom = memberChatRoomRepository.findChatRoomByMemberAndChatRoomIdAndNotClosed(member, chatRoomId)
                 .orElseThrow(() -> new RestApiException(ChattingErrorCode.CHATROOM_NOT_FOUND));

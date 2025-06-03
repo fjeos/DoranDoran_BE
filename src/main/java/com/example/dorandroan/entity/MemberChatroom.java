@@ -30,4 +30,7 @@ public class MemberChatroom {
     @JoinColumn(name = "group_chatroom_id")
     private GroupChatroom groupChatroom;
 
+    public void out() {
+        this.quit = true;
+    }
 }
