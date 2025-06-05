@@ -73,7 +73,7 @@ public class ChatRoomController {
     @PostMapping("/group")
     public ResponseEntity<Void> enterGroupChatroom(@AuthenticationPrincipal CustomUserDetails member,
                                                    @RequestParam("id") Long chatRoomId) {
-        chatRoomService.enterGroupChatroom(member, chatRoomId);
+        chatRoomService.enterGroupChatroom(member.getMember(), chatRoomId);
         return ResponseEntity.ok().build();
     }
 

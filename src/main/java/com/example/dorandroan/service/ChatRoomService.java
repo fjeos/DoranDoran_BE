@@ -145,13 +145,13 @@ public class ChatRoomService {
     }
 
     @Transactional
-    public void enterGroupChatroom(CustomUserDetails member, Long chatRoomId) {
+    public void enterGroupChatroom(Member member, Long chatRoomId) {
 
         GroupChatroom groupChatroom = groupChatRoomRepository.findById(chatRoomId)
                 .orElseThrow(() -> new RestApiException(ChattingErrorCode.CHATROOM_NOT_FOUND));
 
         if (memberChatRoomRepository.existsByMember_MemberIdAndGroupChatroom_GroupChatroomId(
-                member.getMember().getMemberId(), chatRoomId))
+                member.getMemberId(), chatRoomId))
             throw new RestApiException(ChattingErrorCode.ALREADY_JOINED);
 
         if (groupChatroom.getMaxPartIn() >= groupChatroom.getNowPartIn())
@@ -159,8 +159,9 @@ public class ChatRoomService {
 
         memberChatRoomRepository.save(MemberChatroom.builder()
                 .groupChatroom(groupChatroom)
-                .member(memberService.findMember(member.getMember().getMemberId()))
+                .member(memberService.findMember(member.getMemberId()))
                 .role(ChatRoomRole.PART).build());
+        chatService.sendSystemMessage(chatRoomId, true, member.getNickname() + "님이 입장하셨습니다.");
         groupChatroom.enterRoom();
     }
 
@@ -239,13 +240,19 @@ public class ChatRoomService {
         if (chatroom.getMemberA().equals(member)) {
             if (chatroom.isAOut())
                 throw new RestApiException(ChattingErrorCode.NOT_PART_IN);
-            else
+            else {
+                chatService.sendSystemMessage(privateId, false, chatroom.getMemberA().getNickname()
+                        + "님이 퇴장하셨습니다.");
                 chatroom.outA();
+            }
         } else {
             if (chatroom.isBOut())
                 throw new RestApiException(ChattingErrorCode.NOT_PART_IN);
-            else
+            else {
+                chatService.sendSystemMessage(privateId, false, chatroom.getMemberB().getNickname()
+                        + "님이 퇴장하셨습니다.");
                 chatroom.outB();
+            }
         }
     }
 
@@ -255,6 +262,7 @@ public class ChatRoomService {
                 .orElseThrow(() -> new RestApiException(ChattingErrorCode.CHATROOM_NOT_FOUND));
         if (chatroom.isQuit())
             throw new RestApiException(ChattingErrorCode.NOT_PART_IN);
+        chatService.sendSystemMessage(groupId, true, member.getNickname() + "님이 퇴장하셨습니다.");
         chatroom.out();
     }
 
