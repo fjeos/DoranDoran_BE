@@ -12,7 +12,6 @@ import org.bson.types.ObjectId;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -56,12 +55,12 @@ public class ChatRoomService {
         return newChatRoom.getGroupChatroomId();
     }
 
-    public List<ChatRoomListResponseDto> getChatRoomLists(CustomUserDetails member) {
-        List<ChatRoomListResponseDto> responseDto = new ArrayList<>();
+    public List<MyChatRoomListResponseDto> getChatRoomLists(CustomUserDetails member) {
+        List<MyChatRoomListResponseDto> responseDto = new ArrayList<>();
 
         List<GroupChatroom> groupList = memberChatRoomRepository.findChatRoomByMember(member.getMember());
         for (GroupChatroom groupChatroom : groupList) {
-            responseDto.add(ChatRoomListResponseDto.toDto(groupChatroom,
+            responseDto.add(MyChatRoomListResponseDto.toDto(groupChatroom,
                     groupChatRepository.findTopByChatRoomIdOrderBySendAtDesc(groupChatroom.getGroupChatroomId())));
         }
         List<PrivateChatroom> privateList = privateChatroomRepository.findChatroomByMember(member.getMember());
@@ -69,7 +68,7 @@ public class ChatRoomService {
             PrivateChat lastChat = privateChatRepository.findTopByChatRoomIdOrderBySendAtDesc(privateChatroom.getPrivateChatroomId());
             if (lastChat == null)
                 continue;
-            responseDto.add(ChatRoomListResponseDto.toPrivateDto(privateChatroom, lastChat,
+            responseDto.add(MyChatRoomListResponseDto.toPrivateDto(privateChatroom, lastChat,
                     privateChatroom.getMemberA().equals(member.getMember())? privateChatroom.getMemberB() : privateChatroom.getMemberA()));
         }
 
@@ -270,5 +269,13 @@ public class ChatRoomService {
         MemberChatroom chatroom = memberChatRoomRepository.findChatRoomByMemberAndChatRoomIdAndNotClosed(member, chatRoomId)
                 .orElseThrow(() -> new RestApiException(ChattingErrorCode.CHATROOM_NOT_FOUND));
         return ChatroomInfoResponseDto.toDto(chatroom.getGroupChatroom(), chatroom.getRole().equals(ChatRoomRole.LEAD));
+    }
+
+    public List<ChatRoomListResponseDto> getGroupChatroomList(Long cursor) {
+
+
+        return groupChatRoomRepository.findAllAndNotClosed(cursor, PageRequest.of(0, 8)).stream().map(
+                c -> ChatRoomListResponseDto.toDto(c, groupChatRepository.findTopByChatRoomIdOrderBySendAtDesc(c.getGroupChatroomId()))
+        ).collect(Collectors.toList());
     }
 }

@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.awt.print.Pageable;
 import java.util.List;
 import java.util.Map;
 
@@ -22,11 +23,11 @@ public class ChatRoomController {
     private final ChatRoomService chatRoomService;
 
     @GetMapping("/lists")
-    public ResponseEntity<List<ChatRoomListResponseDto>> getChatRoomLists(@AuthenticationPrincipal CustomUserDetails member) {
+    public ResponseEntity<List<MyChatRoomListResponseDto>> getChatRoomLists(@AuthenticationPrincipal CustomUserDetails member) {
         return ResponseEntity.ok(chatRoomService.getChatRoomLists(member));
     }
 
-    @GetMapping("/chatrooms")
+    @GetMapping("/info")
     public ResponseEntity<ChatroomInfoResponseDto> getGroupChatroomInfo(@AuthenticationPrincipal CustomUserDetails member,
                                                      @RequestParam("id") Long chatRoomId) {
         return ResponseEntity.ok(chatRoomService.getGroupChatroomInfo(member.getMember(), chatRoomId));
@@ -138,5 +139,11 @@ public class ChatRoomController {
         } else {
             throw new RestApiException(ChattingErrorCode.ILLEGAL_PARAMETER);
         }
+    }
+
+    @GetMapping("/chatrooms")
+    public ResponseEntity<List<ChatRoomListResponseDto>> getGroupChatrooms(@RequestParam(value = "cursor", required = false) Long cursor) {
+
+        return ResponseEntity.ok(chatRoomService.getGroupChatroomList(cursor));
     }
 }
