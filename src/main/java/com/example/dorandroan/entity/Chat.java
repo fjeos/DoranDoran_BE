@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.bson.types.ObjectId;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 @Getter
@@ -18,7 +19,7 @@ public abstract class Chat {
     Long senderId;
     String content;
     String type;
-    LocalDateTime sendAt;
+    Instant sendAt;
 
     public abstract ObjectId getChatId();
 }
