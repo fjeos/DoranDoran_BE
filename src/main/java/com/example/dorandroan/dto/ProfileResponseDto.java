@@ -9,14 +9,14 @@ import lombok.Getter;
 public class ProfileResponseDto {
 
     private Long memberId;
-    private String profileImg;
+    private String profileImage;
     private String nickname;
     private Boolean chatPermitted;
 
     public static ProfileResponseDto toDto(Member member) {
         return ProfileResponseDto.builder()
                 .memberId(member.getMemberId())
-                .profileImg(member.getProfileImg())
+                .profileImage(member.getProfileImg())
                 .nickname(member.getNickname())
                 .chatPermitted(member.getRecommends()).build();
     }
