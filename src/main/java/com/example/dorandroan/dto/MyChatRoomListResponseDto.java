@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -26,7 +27,7 @@ public class MyChatRoomListResponseDto {
     private int nonReadCount;
     private String lastChatContent;
     @JsonIgnore
-    private LocalDateTime lastChatTime;
+    private Instant lastChatTime;
 
     public static MyChatRoomListResponseDto toDto(GroupChatroom chatRoom, Chat lastChat) {
         boolean isChatNull = lastChat == null;
