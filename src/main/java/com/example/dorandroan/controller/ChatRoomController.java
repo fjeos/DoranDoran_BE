@@ -142,8 +142,9 @@ public class ChatRoomController {
     }
 
     @GetMapping("/chatrooms")
-    public ResponseEntity<List<ChatRoomListResponseDto>> getGroupChatrooms(@RequestParam(value = "cursor", required = false) Long cursor) {
+    public ResponseEntity<List<ChatRoomListResponseDto>> getGroupChatrooms(@RequestParam(value = "cursor", required = false) Long cursor,
+                                                                           @RequestParam("limit") Integer limit) {
 
-        return ResponseEntity.ok(chatRoomService.getGroupChatroomList(cursor));
+        return ResponseEntity.ok(chatRoomService.getGroupChatroomList(cursor, limit));
     }
 }

@@ -271,10 +271,10 @@ public class ChatRoomService {
         return ChatroomInfoResponseDto.toDto(chatroom.getGroupChatroom(), chatroom.getRole().equals(ChatRoomRole.LEAD));
     }
 
-    public List<ChatRoomListResponseDto> getGroupChatroomList(Long cursor) {
+    public List<ChatRoomListResponseDto> getGroupChatroomList(Long cursor, Integer limit) {
 
 
-        return groupChatRoomRepository.findAllAndNotClosed(cursor, PageRequest.of(0, 8)).stream().map(
+        return groupChatRoomRepository.findAllAndNotClosed(cursor, PageRequest.of(0, limit)).stream().map(
                 c -> ChatRoomListResponseDto.toDto(c, groupChatRepository.findTopByChatRoomIdOrderBySendAtDesc(c.getGroupChatroomId()))
         ).collect(Collectors.toList());
     }

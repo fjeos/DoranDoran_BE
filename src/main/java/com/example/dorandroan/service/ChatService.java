@@ -14,6 +14,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -39,7 +40,7 @@ public class ChatService {
                 .chatRoomId(roomId)
                 .content(chatDto.getContent())
                 .type(chatDto.getType())
-                .sendAt(LocalDateTime.now())
+                .sendAt(Instant.now())
                 .build());
         template.convertAndSend("/sub/group/" + roomId, ChatResponseDto.toDto(newChat, sender));
     }
@@ -50,11 +51,11 @@ public class ChatService {
         if (isGroup) {
             systemChat = ChatResponseDto.toDto(groupChatRepository.save(GroupChat.builder()
                     .senderId(-1L).groupChatId(UUID.randomUUID().toString())
-                    .chatRoomId(roomId).content(message).type("system").sendAt(LocalDateTime.now()).build()), null);
+                    .chatRoomId(roomId).content(message).type("system").sendAt(Instant.now()).build()), null);
         } else {
             systemChat = ChatResponseDto.toDto(privateChatRepository.save(PrivateChat.builder().chatRoomId(roomId)
                     .privateChatId(UUID.randomUUID().toString())
-                    .type("system").senderId(-1L).sendAt(LocalDateTime.now()).build()), null);
+                    .type("system").senderId(-1L).sendAt(Instant.now()).build()), null);
         }
         String destination = isGroup? "group" : "private";
         template.convertAndSend("/sub/" + destination + "/" + roomId, systemChat);
@@ -69,7 +70,7 @@ public class ChatService {
                 .chatRoomId(roomId)
                 .content(chatDto.getContent())
                 .type(chatDto.getType())
-                .sendAt(LocalDateTime.now())
+                .sendAt(Instant.now())
                 .build());
         template.convertAndSend("/sub/private/" + roomId, ChatResponseDto.toDto(newChat, sender));
     }
