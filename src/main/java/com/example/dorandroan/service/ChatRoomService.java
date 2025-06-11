@@ -31,6 +31,7 @@ public class ChatRoomService {
     private final PrivateChatRepository privateChatRepository;
     private final MemberService memberService;
     private final ChatService chatService;
+
     private Member getNowMember(Long memberId) {
         return memberService.findMember(memberId);
     }
@@ -69,7 +70,7 @@ public class ChatRoomService {
             if (lastChat == null)
                 continue;
             responseDto.add(MyChatRoomListResponseDto.toPrivateDto(privateChatroom, lastChat,
-                    privateChatroom.getMemberA().equals(member.getMember())? privateChatroom.getMemberB() : privateChatroom.getMemberA()));
+                    privateChatroom.getMemberA().equals(member.getMember()) ? privateChatroom.getMemberB() : privateChatroom.getMemberA()));
         }
 
         responseDto.sort((a, b) -> {
@@ -79,7 +80,7 @@ public class ChatRoomService {
             return b.getLastChatTime().compareTo(a.getLastChatTime());
         });
 
-        return  responseDto;
+        return responseDto;
     }
 
 
@@ -139,8 +140,8 @@ public class ChatRoomService {
 
         return privateChatroomRepository.save(
                 PrivateChatroom.builder()
-                .memberA(nowMember)
-                .memberB(otherMember).build()).getPrivateChatroomId();
+                        .memberA(nowMember)
+                        .memberB(otherMember).build()).getPrivateChatroomId();
     }
 
     @Transactional
@@ -173,6 +174,7 @@ public class ChatRoomService {
     public List<ChatResponseDto> getPrivateChats(Long privateId, String key) {
         return getChatResponseDto(privateId, key, false);
     }
+
     private List<ChatResponseDto> getChatResponseDto(Long chatRoomId, String key, boolean isGroup) {
         Pageable pageable = PageRequest.of(0, 30, Sort.by(Sort.Direction.ASC, "id"));
         List<Chat> result;
@@ -190,7 +192,8 @@ public class ChatRoomService {
                 result = privateChatRepository.findByChatRoomIdOrderById(chatRoomId, pageable);
         }
         return result.stream()
-                .map(c -> ChatResponseDto.toDto(c, memberService.findMember(c.getSenderId()))).collect(Collectors.toList());
+                .map(c -> c.getSenderId() == -1? ChatResponseDto.toDto(c, null) :
+                        ChatResponseDto.toDto(c, memberService.findMember(c.getSenderId()))).collect(Collectors.toList());
     }
 
     @Transactional
@@ -250,7 +253,7 @@ public class ChatRoomService {
             else {
                 chatService.sendSystemMessage(privateId, false, MessageType.system,
                         chatroom.getMemberA().getNickname()
-                        + "님이 퇴장하셨습니다.");
+                                + "님이 퇴장하셨습니다.");
                 chatroom.outA();
             }
         } else {
@@ -259,7 +262,7 @@ public class ChatRoomService {
             else {
                 chatService.sendSystemMessage(privateId, false, MessageType.system,
                         chatroom.getMemberB().getNickname()
-                        + "님이 퇴장하셨습니다.");
+                                + "님이 퇴장하셨습니다.");
                 chatroom.outB();
             }
         }
