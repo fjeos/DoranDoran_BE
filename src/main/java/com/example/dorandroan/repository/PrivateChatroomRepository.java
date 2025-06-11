@@ -13,6 +13,8 @@ public interface PrivateChatroomRepository extends JpaRepository<PrivateChatroom
     @Query("SELECT cr FROM PrivateChatroom cr WHERE cr.memberA = :member or cr.memberB = :member")
     List<PrivateChatroom> findChatroomByMember(Member member);
 
-    @Query("SELECT cr FROM PrivateChatroom cr WHERE cr.memberA = :member or cr.memberB = :member and cr.privateChatroomId = :privateId")
+    @Query("SELECT cr FROM PrivateChatroom cr WHERE cr.privateChatroomId = :privateId and " +
+            "(cr.memberA = :member and cr.aOut = false ) or " +
+            "(cr.memberB = :member and cr.bOut = false)")
     Optional<PrivateChatroom> findChatroomByMemberAndNotQuit(Member member, Long privateId);
 }

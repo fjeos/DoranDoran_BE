@@ -4,10 +4,9 @@ import com.example.dorandroan.dto.ChatDto;
 import com.example.dorandroan.dto.ChatResponseDto;
 import com.example.dorandroan.entity.*;
 import com.example.dorandroan.global.RestApiException;
+import com.example.dorandroan.global.error.ChattingErrorCode;
 import com.example.dorandroan.global.error.MemberErrorCode;
-import com.example.dorandroan.repository.GroupChatRepository;
-import com.example.dorandroan.repository.GroupChatRoomRepository;
-import com.example.dorandroan.repository.PrivateChatRepository;
+import com.example.dorandroan.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -18,6 +17,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -29,20 +29,35 @@ public class ChatService {
     private final MemberService memberService;
     private final GroupChatRepository groupChatRepository;
     private final PrivateChatRepository privateChatRepository;
+    private final MemberChatRoomRepository memberChatRoomRepository;
+    private final PrivateChatroomRepository privateChatroomRepository;
     private final SimpMessagingTemplate template;
 
     @Transactional
     public void sendGroupMessage(Long roomId, Long memberId, ChatDto chatDto) {
         Member sender = memberService.findMember(memberId);
+        if (!validateChattingMember(sender, roomId, true))
+            throw new RestApiException(ChattingErrorCode.NOT_PART_IN);
 
-        GroupChat newChat = groupChatRepository.save(GroupChat.builder().senderId(sender.getMemberId())
-                .groupChatId(UUID.randomUUID().toString())
-                .chatRoomId(roomId)
-                .content(chatDto.getContent())
-                .type(chatDto.getType())
-                .sendAt(Instant.now())
-                .build());
-        template.convertAndSend("/sub/group/" + roomId, ChatResponseDto.toDto(newChat, sender));
+        if (chatDto.getContent() == null) {
+            MemberChatroom chatroom = memberChatRoomRepository.findById(roomId)
+                    .orElseThrow(() -> new RestApiException(ChattingErrorCode.CHATROOM_NOT_FOUND));
+            if (chatDto.getType().equals("enter"))
+                chatroom.enter();
+            else if (chatDto.getType().equals("leave"))
+                chatroom.leave();
+            else
+                throw new RestApiException(ChattingErrorCode.INVALID_TYPE);
+        } else {
+            GroupChat newChat = groupChatRepository.save(GroupChat.builder().senderId(sender.getMemberId())
+                    .groupChatId(UUID.randomUUID().toString())
+                    .chatRoomId(roomId)
+                    .content(chatDto.getContent())
+                    .type(chatDto.getType())
+                    .sendAt(Instant.now())
+                    .build());
+            template.convertAndSend("/sub/group/" + roomId, ChatResponseDto.toDto(newChat, sender));
+        }
     }
 
     @Transactional
@@ -64,7 +79,8 @@ public class ChatService {
     @Transactional
     public void sendPrivateMessage(Long roomId, Long memberId, ChatDto chatDto) {
         Member sender = memberService.findMember(memberId);
-
+        if (!validateChattingMember(sender, roomId, false))
+            throw new RestApiException(ChattingErrorCode.NOT_PART_IN);
         PrivateChat newChat = privateChatRepository.save(PrivateChat.builder().senderId(sender.getMemberId())
                 .privateChatId(UUID.randomUUID().toString())
                 .chatRoomId(roomId)
@@ -75,5 +91,16 @@ public class ChatService {
         template.convertAndSend("/sub/private/" + roomId, ChatResponseDto.toDto(newChat, sender));
     }
 
+    public void sendAlert(Long memberId) {
+        template.convertAndSend("/sub/personal/" + memberId, "");
+    }
 
+    private boolean validateChattingMember(Member member, Long roomId, boolean isGroup) {
+        if (isGroup) {
+            return memberChatRoomRepository.
+                    existsByMember_MemberIdAndGroupChatroom_GroupChatroomIdAndQuitFalse(member.getMemberId(), roomId);
+        } else {
+            return privateChatroomRepository.findChatroomByMemberAndNotQuit(member, roomId).isPresent();
+        }
+    }
 }
