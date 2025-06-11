@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -38,9 +37,9 @@ public class ChatService {
         if (chatDto.getContent() == null) {
             MemberChatroom chatroom = memberChatRoomRepository.findById(roomId)
                     .orElseThrow(() -> new RestApiException(ChattingErrorCode.CHATROOM_NOT_FOUND));
-            if (chatDto.getType().equals(MessageType.ENTER))
+            if (chatDto.getType().equals(MessageType.enter))
                 chatroom.enter();
-            else if (chatDto.getType().equals(MessageType.LEAVE))
+            else if (chatDto.getType().equals(MessageType.leave))
                 chatroom.leave();
             else
                 throw new RestApiException(ChattingErrorCode.INVALID_TYPE);
