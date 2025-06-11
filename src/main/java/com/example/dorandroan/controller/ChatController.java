@@ -6,8 +6,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
+import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.stereotype.Controller;
 
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Controller;
 @RequiredArgsConstructor
 public class ChatController {
     private final ChatService chatService;
+    private final SimpMessagingTemplate template;
     @MessageMapping("/group/{roomId}")
     public void sendGroupMessage(@DestinationVariable Long roomId, ChatDto chatDto, Message<?> messageObj) {
         SimpMessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(messageObj, SimpMessageHeaderAccessor.class);
@@ -32,5 +35,11 @@ public class ChatController {
     @MessageMapping("/personal/{memberId}")
     public void sendAlert(@DestinationVariable Long memberId) {
         chatService.sendAlert(memberId);
+    }
+
+    @MessageExceptionHandler
+    public void handleException(Throwable ex, Message<?> messageObj) {
+        SimpMessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(messageObj, SimpMessageHeaderAccessor.class);
+        template.convertAndSend("/personal/" + accessor.getSessionAttributes().get("memberId"), ex.getMessage());
     }
 }
