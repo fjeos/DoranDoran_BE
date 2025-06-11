@@ -1,9 +1,12 @@
 package com.example.dorandroan.controller;
 
 import com.example.dorandroan.dto.ChatDto;
+import com.example.dorandroan.global.ErrorCode;
+import com.example.dorandroan.global.ErrorResponse;
 import com.example.dorandroan.service.ChatService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
@@ -40,6 +43,7 @@ public class ChatController {
     @MessageExceptionHandler
     public void handleException(Throwable ex, Message<?> messageObj) {
         SimpMessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(messageObj, SimpMessageHeaderAccessor.class);
-        template.convertAndSend("/personal/" + accessor.getSessionAttributes().get("memberId"), ex.getMessage());
+        template.convertAndSend("/personal/" +
+                accessor.getSessionAttributes().get("memberId"), new ErrorResponse(ex.getMessage(), ex.toString()));
     }
 }
