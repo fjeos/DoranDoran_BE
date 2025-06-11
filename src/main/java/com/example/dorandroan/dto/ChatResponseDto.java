@@ -3,6 +3,7 @@ package com.example.dorandroan.dto;
 import com.example.dorandroan.entity.Chat;
 import com.example.dorandroan.entity.GroupChat;
 import com.example.dorandroan.entity.Member;
+import com.example.dorandroan.entity.MessageType;
 import lombok.Builder;
 import lombok.Getter;
 import org.bson.types.ObjectId;
@@ -16,7 +17,7 @@ import java.util.Locale;
 public class ChatResponseDto {
 
     private String chatId;
-    private String type;
+    private MessageType type;
     private String content;
     private Long senderId;
     private String senderNickname;

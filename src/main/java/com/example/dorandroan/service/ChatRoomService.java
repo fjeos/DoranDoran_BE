@@ -51,7 +51,7 @@ public class ChatRoomService {
                 .quit(false)
                 .groupChatroom(newChatRoom).build());
 
-        chatService.sendSystemMessage(newChatRoom.getGroupChatroomId(), true, "채팅방이 생성되었습니다.");
+        chatService.sendSystemMessage(newChatRoom.getGroupChatroomId(), true, MessageType.SYSTEM, "채팅방이 생성되었습니다.");
         return newChatRoom.getGroupChatroomId();
     }
 
@@ -161,7 +161,7 @@ public class ChatRoomService {
                 .member(memberService.findMember(member.getMemberId()))
                 .role(ChatRoomRole.PART)
                 .quit(false).build());
-        chatService.sendSystemMessage(chatRoomId, true, member.getNickname() + "님이 입장하셨습니다.");
+        chatService.sendSystemMessage(chatRoomId, true, MessageType.SYSTEM, member.getNickname() + "님이 입장하셨습니다.");
         groupChatroom.enterRoom();
     }
 
@@ -197,12 +197,14 @@ public class ChatRoomService {
     public void changeRoomTitle(Member member, ChatRoomTitleUpdateDto requestDto) {
         getMemberChatroomForUpdate(member, requestDto.getChatRoomId())
                 .changeTitle(requestDto.getChatRoomTitle());
+        chatService.sendSystemMessage(requestDto.getChatRoomId(), true, MessageType.CHANGE, "채팅방 제목이 변경되었습니다.");
     }
 
     @Transactional
     public void changeRoomImage(Member member, ChatRoomImageUpdateDto requestDto) {
         getMemberChatroomForUpdate(member, requestDto.getChatRoomId())
                 .changeRoomImage(requestDto.getChatRoomImage());
+        chatService.sendSystemMessage(requestDto.getChatRoomId(), true, MessageType.CHANGE, "채팅방 이미지가 변경되었습니다.");
     }
 
     @Transactional
@@ -211,15 +213,20 @@ public class ChatRoomService {
         if (requestDto.getMaxCount() < chatroom.getNowPartIn())
             throw new RestApiException(ChattingErrorCode.LESS_THAN_NOW);
         chatroom.changeMaxCount(requestDto.getMaxCount());
+        chatService.sendSystemMessage(requestDto.getChatRoomId(), true, MessageType.CHANGE, "채팅방 최대 인원이 변경되었습니다.");
     }
+
     @Transactional
     public void changeRoomDescription(Member member, ChatRoomDescriptionUpdateDto requestDto) {
         getMemberChatroomForUpdate(member, requestDto.getChatRoomId())
                 .changeDescription(requestDto.getDescription());
+        chatService.sendSystemMessage(requestDto.getChatRoomId(), true, MessageType.CHANGE, "채팅방 설명이 변경되었습니다.");
     }
+
     @Transactional
     public void deleteGroupChatRoom(Member member, Long chatRoomId) {
         getMemberChatroomForUpdate(member, chatRoomId).delete();
+        chatService.sendSystemMessage(chatRoomId, true, MessageType.SYSTEM, "채팅방이 폐쇄되었습니다.");
     }
 
     private GroupChatroom getMemberChatroomForUpdate(Member member, Long chatRoomId) {
@@ -241,7 +248,8 @@ public class ChatRoomService {
             if (chatroom.isAOut())
                 throw new RestApiException(ChattingErrorCode.NOT_PART_IN);
             else {
-                chatService.sendSystemMessage(privateId, false, chatroom.getMemberA().getNickname()
+                chatService.sendSystemMessage(privateId, false, MessageType.SYSTEM,
+                        chatroom.getMemberA().getNickname()
                         + "님이 퇴장하셨습니다.");
                 chatroom.outA();
             }
@@ -249,7 +257,8 @@ public class ChatRoomService {
             if (chatroom.isBOut())
                 throw new RestApiException(ChattingErrorCode.NOT_PART_IN);
             else {
-                chatService.sendSystemMessage(privateId, false, chatroom.getMemberB().getNickname()
+                chatService.sendSystemMessage(privateId, false, MessageType.SYSTEM,
+                        chatroom.getMemberB().getNickname()
                         + "님이 퇴장하셨습니다.");
                 chatroom.outB();
             }
@@ -262,7 +271,7 @@ public class ChatRoomService {
                 .orElseThrow(() -> new RestApiException(ChattingErrorCode.CHATROOM_NOT_FOUND));
         if (chatroom.isQuit())
             throw new RestApiException(ChattingErrorCode.NOT_PART_IN);
-        chatService.sendSystemMessage(groupId, true, member.getNickname() + "님이 퇴장하셨습니다.");
+        chatService.sendSystemMessage(groupId, true, MessageType.SYSTEM, member.getNickname() + "님이 퇴장하셨습니다.");
         chatroom.out();
     }
 
@@ -279,4 +288,5 @@ public class ChatRoomService {
                 c -> ChatRoomListResponseDto.toDto(c, groupChatRepository.findTopByChatRoomIdOrderBySendAtDesc(c.getGroupChatroomId()))
         ).collect(Collectors.toList());
     }
+
 }
