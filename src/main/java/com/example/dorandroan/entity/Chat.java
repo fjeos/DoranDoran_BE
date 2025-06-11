@@ -18,7 +18,7 @@ public abstract class Chat {
     Long chatRoomId;
     Long senderId;
     String content;
-    String type;
+    MessageType type;
     Instant sendAt;
 
     public abstract ObjectId getChatId();
