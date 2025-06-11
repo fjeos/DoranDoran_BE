@@ -28,4 +28,9 @@ public class ChatController {
         SimpMessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(messageObj, SimpMessageHeaderAccessor.class);
         chatService.sendPrivateMessage(roomId, (Long) accessor.getSessionAttributes().get("memberId"), chatDto);
     }
+
+    @MessageMapping("/personal/{memberId}")
+    public void sendAlert(@DestinationVariable Long memberId) {
+        chatService.sendAlert(memberId);
+    }
 }

@@ -3,6 +3,8 @@ package com.example.dorandroan.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.Instant;
+
 @Entity
 @Getter
 @Builder
@@ -30,7 +32,21 @@ public class MemberChatroom {
     @JoinColumn(name = "group_chatroom_id")
     private GroupChatroom groupChatroom;
 
+    @Column
+    private Instant enterTime;
+
+    @Column
+    private Instant leaveTime;
+
     public void out() {
         this.quit = true;
+    }
+
+    public void enter() {
+        this.enterTime = Instant.now();
+    }
+
+    public void leave() {
+        this.leaveTime = Instant.now();
     }
 }

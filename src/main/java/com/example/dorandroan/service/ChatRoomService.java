@@ -149,7 +149,7 @@ public class ChatRoomService {
         GroupChatroom groupChatroom = groupChatRoomRepository.findById(chatRoomId)
                 .orElseThrow(() -> new RestApiException(ChattingErrorCode.CHATROOM_NOT_FOUND));
 
-        if (memberChatRoomRepository.existsByMember_MemberIdAndGroupChatroom_GroupChatroomId(
+        if (memberChatRoomRepository.existsByMember_MemberIdAndGroupChatroom_GroupChatroomIdAndQuitFalse(
                 member.getMemberId(), chatRoomId))
             throw new RestApiException(ChattingErrorCode.ALREADY_JOINED);
 
@@ -159,7 +159,8 @@ public class ChatRoomService {
         memberChatRoomRepository.save(MemberChatroom.builder()
                 .groupChatroom(groupChatroom)
                 .member(memberService.findMember(member.getMemberId()))
-                .role(ChatRoomRole.PART).build());
+                .role(ChatRoomRole.PART)
+                .quit(false).build());
         chatService.sendSystemMessage(chatRoomId, true, member.getNickname() + "님이 입장하셨습니다.");
         groupChatroom.enterRoom();
     }
