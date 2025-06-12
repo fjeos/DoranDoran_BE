@@ -76,8 +76,7 @@ public class ChatService {
         Member sender = memberService.findMember(memberId);
         if (validateChattingMember(sender, roomId, false))
             throw new RestApiException(ChattingErrorCode.NOT_PART_IN);
-        System.out.println("==========Now Got Content========");
-        System.out.println(chatDto.getContent() + "    " + chatDto.getType() + "     " + memberId);
+
         if (chatDto.getContent() == null) {
             PrivateChatroom chatroom = privateChatroomRepository.findById(roomId)
                     .orElseThrow(() -> new RestApiException(ChattingErrorCode.CHATROOM_NOT_FOUND));
@@ -94,7 +93,6 @@ public class ChatService {
                 default -> throw new RestApiException(ChattingErrorCode.INVALID_TYPE);
             }
         } else {
-            System.out.println("=!=!=!=!=!Here!=!=!=!=!=");
             PrivateChat newChat = privateChatRepository.save(PrivateChat.builder().senderId(sender.getMemberId())
                     .privateChatId(UUID.randomUUID().toString())
                     .chatRoomId(roomId)
