@@ -37,12 +37,11 @@ public class ChatService {
         if (chatDto.getContent() == null) {
             MemberChatroom chatroom = memberChatRoomRepository.findById(roomId)
                     .orElseThrow(() -> new RestApiException(ChattingErrorCode.CHATROOM_NOT_FOUND));
-            if (chatDto.getType().equals(MessageType.enter))
-                chatroom.enter();
-            else if (chatDto.getType().equals(MessageType.leave))
-                chatroom.leave();
-            else
-                throw new RestApiException(ChattingErrorCode.INVALID_TYPE);
+            switch (chatDto.getType()) {
+                case enter -> chatroom.enter();
+                case leave -> chatroom.leave();
+                default -> throw new RestApiException(ChattingErrorCode.INVALID_TYPE);
+            }
         } else {
             GroupChat newChat = groupChatRepository.save(GroupChat.builder().senderId(sender.getMemberId())
                     .groupChatId(UUID.randomUUID().toString())
@@ -68,7 +67,7 @@ public class ChatService {
                     .privateChatId(UUID.randomUUID().toString())
                     .type(type).senderId(-1L).sendAt(Instant.now()).build()), null);
         }
-        String destination = isGroup? "group" : "private";
+        String destination = isGroup ? "group" : "private";
         template.convertAndSend("/sub/" + destination + "/" + roomId, systemChat);
     }
 
@@ -77,15 +76,33 @@ public class ChatService {
         Member sender = memberService.findMember(memberId);
         if (validateChattingMember(sender, roomId, false))
             throw new RestApiException(ChattingErrorCode.NOT_PART_IN);
-        PrivateChat newChat = privateChatRepository.save(PrivateChat.builder().senderId(sender.getMemberId())
-                .privateChatId(UUID.randomUUID().toString())
-                .chatRoomId(roomId)
-                .content(chatDto.getContent())
-                .type(chatDto.getType())
-                .sendAt(Instant.now())
-                .build());
-        template.convertAndSend("/sub/private/" + roomId, ChatResponseDto.toDto(newChat, sender));
-        sendAlert(chatAndMemberUtil.findOtherAtPrivateChatroom(roomId, sender).getMemberId());
+
+        if (chatDto.getContent() == null) {
+            PrivateChatroom chatroom = privateChatroomRepository.findById(roomId)
+                    .orElseThrow(() -> new RestApiException(ChattingErrorCode.CHATROOM_NOT_FOUND));
+            boolean amIMemberA = chatAndMemberUtil.amIMemberA(chatroom, sender);
+            switch (chatDto.getType()) {
+                case enter -> {
+                    if (amIMemberA) chatroom.enterA();
+                    else chatroom.enterB();
+                }
+                case leave -> {
+                    if (amIMemberA) chatroom.leaveA();
+                    else chatroom.leaveB();
+                }
+                default -> throw new RestApiException(ChattingErrorCode.INVALID_TYPE);
+            }
+        } else {
+            PrivateChat newChat = privateChatRepository.save(PrivateChat.builder().senderId(sender.getMemberId())
+                    .privateChatId(UUID.randomUUID().toString())
+                    .chatRoomId(roomId)
+                    .content(chatDto.getContent())
+                    .type(chatDto.getType())
+                    .sendAt(Instant.now())
+                    .build());
+            template.convertAndSend("/sub/private/" + roomId, ChatResponseDto.toDto(newChat, sender));
+            sendAlert(chatAndMemberUtil.findOtherAtPrivateChatroom(roomId, sender).getMemberId());
+        }
     }
 
     public void sendAlert(Long memberId) {
