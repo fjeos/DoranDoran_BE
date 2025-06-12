@@ -94,6 +94,7 @@ public class ChatService {
                 default -> throw new RestApiException(ChattingErrorCode.INVALID_TYPE);
             }
         } else {
+            System.out.println("=!=!=!=!=!Here!=!=!=!=!=");
             PrivateChat newChat = privateChatRepository.save(PrivateChat.builder().senderId(sender.getMemberId())
                     .privateChatId(UUID.randomUUID().toString())
                     .chatRoomId(roomId)
