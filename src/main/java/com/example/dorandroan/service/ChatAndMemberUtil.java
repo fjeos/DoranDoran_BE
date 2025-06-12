@@ -30,4 +30,8 @@ public class ChatAndMemberUtil {
     public List<Member> findGroupChatroomMembers(Long roomId) {
         return memberChatRoomRepository.findMemberByChatRoom(roomId);
     }
+
+    public boolean amIMemberA(PrivateChatroom chatroom, Member nowMember) {
+        return chatroom.getMemberA().equals(nowMember);
+    }
 }
