@@ -154,7 +154,7 @@ public class ChatRoomService {
                 member.getMemberId(), chatRoomId))
             throw new RestApiException(ChattingErrorCode.ALREADY_JOINED);
 
-        if (groupChatroom.getMaxPartIn() >= groupChatroom.getNowPartIn())
+        if (groupChatroom.getMaxPartIn() <= groupChatroom.getNowPartIn())
             throw new RestApiException(ChattingErrorCode.FULL_CHATROOM);
 
         memberChatRoomRepository.save(MemberChatroom.builder()
