@@ -11,8 +11,8 @@ import java.util.Optional;
 
 public interface MemberChatRoomRepository extends JpaRepository<MemberChatroom, Long> {
 
-    @Query("SELECT mc.groupChatroom FROM MemberChatroom mc WHERE mc.member = :member")
-    List<GroupChatroom> findChatRoomByMember(Member member);
+    @Query("SELECT mc.groupChatroom FROM MemberChatroom mc WHERE mc.member = :member and mc.quit = false")
+    List<GroupChatroom> findChatRoomByMemberAndNotQuit(Member member);
 
     @Query("SELECT mc.member FROM MemberChatroom mc WHERE mc.groupChatroom.groupChatroomId = :chatRoomId")
     List<Member> findMemberByChatRoom(Long chatRoomId);
