@@ -8,6 +8,7 @@ import com.example.dorandroan.global.error.MemberErrorCode;
 import com.example.dorandroan.global.jwt.CustomUserDetails;
 import com.example.dorandroan.repository.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -19,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -61,7 +63,7 @@ public class ChatRoomService {
 
         List<GroupChatroom> groupList = memberChatRoomRepository.findChatRoomByMemberAndNotQuit(member.getMember());
         for (GroupChatroom groupChatroom : groupList) {
-            System.out.println("    Now Chatroom   :" + groupChatroom.getGroupChatroomId() + "  " + groupChatroom.getTitle());
+            log.info("    Now Chatroom   :" + groupChatroom.getGroupChatroomId() + "  " + groupChatroom.getTitle());
             responseDto.add(MyChatRoomListResponseDto.toDto(groupChatroom,
                     groupChatRepository.findTopByChatRoomIdOrderBySendAtDesc(groupChatroom.getGroupChatroomId())));
         }
