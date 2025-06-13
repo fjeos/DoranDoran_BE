@@ -39,6 +39,11 @@ public class GroupChatroom {
             this.nowPartIn++;
     }
 
+    public void leaveRoom() {
+        if (this.nowPartIn > 0)
+            this.nowPartIn--;
+    }
+
     public void changeTitle(String title) {
         this.title = title;
     }

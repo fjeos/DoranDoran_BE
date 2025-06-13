@@ -276,6 +276,8 @@ public class ChatRoomService {
             throw new RestApiException(ChattingErrorCode.NOT_PART_IN);
         chatService.sendSystemMessage(groupId, true, MessageType.system, member.getNickname() + "님이 퇴장하셨습니다.");
         chatroom.out();
+        groupChatRoomRepository.findById(groupId)
+                .orElseThrow(() -> new RestApiException(ChattingErrorCode.CHATROOM_NOT_FOUND)).leaveRoom();
     }
 
     public ChatroomInfoResponseDto getGroupChatroomInfo(Member member, Long chatRoomId) {
