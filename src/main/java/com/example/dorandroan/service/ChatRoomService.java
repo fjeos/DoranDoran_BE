@@ -63,7 +63,6 @@ public class ChatRoomService {
 
         List<GroupChatroom> groupList = memberChatRoomRepository.findChatRoomByMemberAndNotQuit(member.getMember());
         for (GroupChatroom groupChatroom : groupList) {
-            log.info("    Now Chatroom   :" + groupChatroom.getGroupChatroomId() + "  " + groupChatroom.getTitle());
             responseDto.add(MyChatRoomListResponseDto.toDto(groupChatroom,
                     groupChatRepository.findTopByChatRoomIdOrderBySendAtDesc(groupChatroom.getGroupChatroomId())));
         }
