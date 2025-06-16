@@ -63,7 +63,7 @@ public class SecurityConfig {
                         auth -> auth
                                 .requestMatchers("/", "/health", "/member/signup", "/member/nickname",
                                         "/member/auth/*", "/member/relogin", "/member/password",
-                                        "/ws/**").permitAll()
+                                        "/ws/**", "/member/reissue").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/chat/chatrooms").permitAll()
                                 .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
