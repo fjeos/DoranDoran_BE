@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,4 +20,6 @@ public interface GroupChatRepository extends MongoRepository<GroupChat, String> 
     List<Chat> findByChatRoomIdAndIdLessThanOrderById(Long chatRoomId, ObjectId lastId, Pageable pageable);
 
     List<Chat> findByChatRoomIdOrderById(Long chatRoomId, Pageable pageable);
+
+    int countBySendAtBetween(Instant leaveTime, Instant enterTime);
 }

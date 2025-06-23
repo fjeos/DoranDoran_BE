@@ -29,21 +29,22 @@ public class MyChatRoomListResponseDto {
     @JsonIgnore
     private Instant lastChatTime;
 
-    public static MyChatRoomListResponseDto toDto(GroupChatroom chatRoom, Chat lastChat) {
+    public static MyChatRoomListResponseDto toDto(GroupChatroom chatRoom, Chat lastChat, int unreadCount) {
         boolean isChatNull = lastChat == null;
         return MyChatRoomListResponseDto.builder()
                 .chatRoomId(chatRoom.getGroupChatroomId())
                 .group(true)
                 .chatRoomTitle(chatRoom.getTitle())
-                .partInPeople(chatRoom.getMaxPartIn())
+                .partInPeople(chatRoom.getNowPartIn())
                 .chatRoomImage(chatRoom.getChatRoomImg())
                 .closed(chatRoom.isClosed())
-                .nonReadCount(isChatNull? 0 : 1)
+                .nonReadCount(unreadCount)
                 .lastChatContent(isChatNull? null : lastChat.getContent())
                 .lastChatTime(isChatNull? null : lastChat.getSendAt())
                 .build();
     }
-    public static MyChatRoomListResponseDto toPrivateDto(PrivateChatroom chatRoom, Chat lastChat, Member otherMember) {
+    public static MyChatRoomListResponseDto toPrivateDto(PrivateChatroom chatRoom, Chat lastChat, Member otherMember,
+                                                         int unreadCount) {
         boolean isChatNull = lastChat == null;
         return MyChatRoomListResponseDto.builder()
                 .chatRoomId(chatRoom.getPrivateChatroomId())
@@ -52,7 +53,7 @@ public class MyChatRoomListResponseDto {
                 .partInPeople(2)
                 .chatRoomImage(otherMember.getProfileImg())
                 .closed(false)
-                .nonReadCount(isChatNull? 0 : 1)
+                .nonReadCount(unreadCount)
                 .lastChatContent(isChatNull? null : lastChat.getContent())
                 .lastChatTime(isChatNull? null : lastChat.getSendAt())
                 .build();
