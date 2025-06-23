@@ -31,6 +31,7 @@ public class ChatRoomService {
     private final PrivateChatroomRepository privateChatroomRepository;
     private final GroupChatRepository groupChatRepository;
     private final PrivateChatRepository privateChatRepository;
+    private final ChatAndMemberUtil chatAndMemberUtil;
     private final MemberService memberService;
     private final ChatService chatService;
 
@@ -61,10 +62,11 @@ public class ChatRoomService {
     public List<MyChatRoomListResponseDto> getChatRoomLists(CustomUserDetails member) {
         List<MyChatRoomListResponseDto> responseDto = new ArrayList<>();
 
-        List<GroupChatroom> groupList = memberChatRoomRepository.findChatRoomByMemberAndNotQuit(member.getMember());
-        for (GroupChatroom groupChatroom : groupList) {
-            responseDto.add(MyChatRoomListResponseDto.toDto(groupChatroom,
-                    groupChatRepository.findTopByChatRoomIdOrderBySendAtDesc(groupChatroom.getGroupChatroomId())));
+        List<MemberChatroom> groupList = memberChatRoomRepository.findChatRoomByMemberAndNotQuit(member.getMember());
+        for (MemberChatroom memberChatroom : groupList) {
+            responseDto.add(MyChatRoomListResponseDto.toDto(memberChatroom.getGroupChatroom(),
+                    groupChatRepository.findTopByChatRoomIdOrderBySendAtDesc(memberChatroom.getGroupChatroom().getGroupChatroomId()),
+                    countGroupUnreadChat(memberChatroom)));
         }
         List<PrivateChatroom> privateList = privateChatroomRepository.findChatroomByMember(member.getMember());
         for (PrivateChatroom privateChatroom : privateList) {
@@ -72,7 +74,8 @@ public class ChatRoomService {
             if (lastChat == null)
                 continue;
             responseDto.add(MyChatRoomListResponseDto.toPrivateDto(privateChatroom, lastChat,
-                    privateChatroom.getMemberA().equals(member.getMember()) ? privateChatroom.getMemberB() : privateChatroom.getMemberA()));
+                    privateChatroom.getMemberA().equals(member.getMember()) ? privateChatroom.getMemberB() : privateChatroom.getMemberA(),
+                    countPrivateUnreadChat(member.getMember(), privateChatroom)));
         }
 
         responseDto.sort((a, b) -> {
@@ -296,4 +299,13 @@ public class ChatRoomService {
         ).collect(Collectors.toList());
     }
 
+    public int countGroupUnreadChat(MemberChatroom memberChatroom) {
+        return groupChatRepository.countBySendAtBetween(memberChatroom.getLeaveTime(), memberChatroom.getEnterTime());
+    }
+    public int countPrivateUnreadChat(Member nowMember, PrivateChatroom privateChatroom) {
+        if (chatAndMemberUtil.amIMemberA(privateChatroom, nowMember))
+            return privateChatRepository.countBySendAtBetween(privateChatroom.getALeaveTime(), privateChatroom.getAEnterTime());
+        else
+            return privateChatRepository.countBySendAtBetween(privateChatroom.getBLeaveTime(), privateChatroom.getBEnterTime());
+    }
 }
