@@ -17,4 +17,8 @@ public interface PrivateChatroomRepository extends JpaRepository<PrivateChatroom
             "(cr.memberA = :member and cr.aOut = false ) or " +
             "(cr.memberB = :member and cr.bOut = false)")
     Optional<PrivateChatroom> findChatroomByMemberAndNotQuit(Member member, Long privateId);
+
+    @Query("SELECT pc FROM PrivateChatroom pc WHERE pc.memberA = :nowMember and pc.memberB = :otherMember or " +
+            "pc.memberA = :otherMember and pc.memberB = :nowMember")
+    Optional<PrivateChatroom> findByTwoMembers(Member nowMember, Member otherMember);
 }

@@ -143,6 +143,10 @@ public class ChatRoomService {
         if (nowMember.equals(otherMember) || nowMember.getState() || otherMember.getState() || !otherMember.getRecommends())
             throw new RestApiException(ChattingErrorCode.INVALID_MEMBER);
 
+        if (privateChatroomRepository.findByTwoMembers(nowMember, otherMember).isPresent()) {
+            throw new RestApiException(ChattingErrorCode.ALREADY_JOINED);
+        }
+
         return privateChatroomRepository.save(
                 PrivateChatroom.builder()
                         .memberA(nowMember)
