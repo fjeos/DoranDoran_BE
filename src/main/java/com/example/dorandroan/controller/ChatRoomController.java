@@ -81,11 +81,12 @@ public class ChatRoomController {
     @GetMapping("/chats")
     public ResponseEntity<List<ChatResponseDto>> getChats(@RequestParam(value = "groupId", required = false) Long groupId,
                                                           @RequestParam(value = "privateId", required = false) Long privateId,
-                                                          @RequestParam(value = "key", required = false) String key) {
+                                                          @RequestParam(value = "key", required = false) String key,
+                                                          @AuthenticationPrincipal CustomUserDetails member) {
         if (groupId == null) {
-            return ResponseEntity.ok(chatRoomService.getPrivateChats(privateId, key));
+            return ResponseEntity.ok(chatRoomService.getPrivateChats(privateId, key, member.getMember()));
         } else if (privateId == null) {
-            return ResponseEntity.ok(chatRoomService.getGroupChats(groupId, key));
+            return ResponseEntity.ok(chatRoomService.getGroupChats(groupId, key, member.getMember()));
         } else {
             throw new RestApiException(ChattingErrorCode.ILLEGAL_PARAMETER);
         }

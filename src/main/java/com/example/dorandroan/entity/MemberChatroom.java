@@ -33,6 +33,9 @@ public class MemberChatroom {
     private GroupChatroom groupChatroom;
 
     @Column
+    private Instant joinTime;
+
+    @Column
     private Instant enterTime;
 
     @Column
