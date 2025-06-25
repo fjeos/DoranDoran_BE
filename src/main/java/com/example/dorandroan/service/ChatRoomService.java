@@ -11,13 +11,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.mongodb.core.query.Query;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.time.Instant;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -34,6 +36,7 @@ public class ChatRoomService {
     private final ChatAndMemberUtil chatAndMemberUtil;
     private final MemberService memberService;
     private final ChatService chatService;
+    private final MongoTemplate mongoTemplate;
 
     private Member getNowMember(Long memberId) {
         return memberService.findMember(memberId);
@@ -170,38 +173,43 @@ public class ChatRoomService {
                 .groupChatroom(groupChatroom)
                 .member(memberService.findMember(member.getMemberId()))
                 .role(ChatRoomRole.PART)
+                .joinTime(Instant.now())
                 .quit(false).build());
         chatService.sendSystemMessage(chatRoomId, true, MessageType.system, member.getNickname() + "님이 입장하셨습니다.");
         groupChatroom.enterRoom();
     }
 
-    public List<ChatResponseDto> getGroupChats(Long chatRoomId, String key) {
-        return getChatResponseDto(chatRoomId, key, true);
+    public List<ChatResponseDto> getGroupChats(Long chatRoomId, String key, Member member) {
+        return getChatResponseDto(chatRoomId, key, true, member);
     }
 
 
-    public List<ChatResponseDto> getPrivateChats(Long privateId, String key) {
-        return getChatResponseDto(privateId, key, false);
+    public List<ChatResponseDto> getPrivateChats(Long privateId, String key, Member member) {
+        return getChatResponseDto(privateId, key, false, member);
     }
 
-    private List<ChatResponseDto> getChatResponseDto(Long chatRoomId, String key, boolean isGroup) {
-        Pageable pageable = PageRequest.of(0, 30, Sort.by(Sort.Direction.ASC, "id"));
-        List<Chat> result;
-        if (key != null) {
-            ObjectId lastId = new ObjectId(key);
-            if (isGroup)
-                result = groupChatRepository.findByChatRoomIdAndIdLessThanOrderById(chatRoomId, lastId, pageable);
-            else
-                result = privateChatRepository.findByChatRoomIdAndIdLessThanOrderById(chatRoomId, lastId, pageable);
-
-        } else {
-            if (isGroup)
-                result = groupChatRepository.findByChatRoomIdOrderById(chatRoomId, pageable);
-            else
-                result = privateChatRepository.findByChatRoomIdOrderById(chatRoomId, pageable);
+    private List<ChatResponseDto> getChatResponseDto(Long chatRoomId, String key, boolean isGroup, Member member) {
+        Query query = new Query()
+                .addCriteria(Criteria.where("chatRoomId").is(chatRoomId))
+                .with(Sort.by(Sort.Direction.DESC, "sendAt"))
+                .limit(30);
+        if (isGroup) {
+            Instant enterTime = memberChatRoomRepository.findChatRoomByMemberAndChatRoomIdAndNotClosed(member, chatRoomId)
+                    .orElseThrow(() -> new RestApiException(ChattingErrorCode.CHATROOM_NOT_FOUND)).getJoinTime();
+            query.addCriteria(Criteria.where("sendAt").gt(enterTime));
         }
-        return result.stream()
-                .map(c -> c.getSenderId() == -1? ChatResponseDto.toDto(c, null) :
+        if (key != null) {
+            query.addCriteria(Criteria.where("_id").lt(new ObjectId((key))));
+        }
+
+        List<? extends Chat> chats;
+        if (isGroup)
+            chats = mongoTemplate.find(query, GroupChat.class);
+        else chats = mongoTemplate.find(query, PrivateChat.class);
+
+        Collections.reverse(chats);
+        return chats.stream()
+                .map(c -> c.getSenderId() == -1 ? ChatResponseDto.toDto(c, null) :
                         ChatResponseDto.toDto(c, memberService.findMember(c.getSenderId()))).collect(Collectors.toList());
     }
 
@@ -306,6 +314,7 @@ public class ChatRoomService {
     public int countGroupUnreadChat(MemberChatroom memberChatroom) {
         return groupChatRepository.countBySendAtBetween(memberChatroom.getLeaveTime(), memberChatroom.getEnterTime());
     }
+
     public int countPrivateUnreadChat(Member nowMember, PrivateChatroom privateChatroom) {
         if (chatAndMemberUtil.amIMemberA(privateChatroom, nowMember))
             return privateChatRepository.countBySendAtBetween(privateChatroom.getALeaveTime(), privateChatroom.getAEnterTime());
