@@ -24,6 +24,7 @@ public class ChatController {
     private final SimpMessagingTemplate template;
     @MessageMapping("/group/{roomId}")
     public void sendGroupMessage(@DestinationVariable Long roomId, ChatDto chatDto, Message<?> messageObj) {
+        log.info("Publishing Message. . .");
         SimpMessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(messageObj, SimpMessageHeaderAccessor.class);
         Long memberId = (Long) accessor.getSessionAttributes().get("memberId");
         chatService.sendGroupMessage(roomId, memberId, chatDto);
