@@ -39,6 +39,7 @@ public class ChatService {
         System.out.println("chatDto.getType(): " + chatDto.getType());
         System.out.println("Type class: " + (chatDto.getType() != null ? chatDto.getType().getClass() : "null"));
         System.out.println("Now Chat Type:  " + chatDto.getType());
+        System.out.println("Now Content:  " + chatDto.getContent());
         if (chatDto.getContent() == null) {
             MemberChatroom chatroom = memberChatRoomRepository.findById(roomId)
                     .orElseThrow(() -> new RestApiException(ChattingErrorCode.CHATROOM_NOT_FOUND));
