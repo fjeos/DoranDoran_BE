@@ -45,30 +45,32 @@ public class ChatService {
         else System.out.println("Content is not null");
         if (chatDto.getContent().equals("null"))
             System.out.println("스트링으로 들어옴");
+        if (chatDto.getType() != null)
+            System.out.println("타입 널 아님");
+        else
+            System.out.println("타입 널임");
         if (chatDto.getContent() == null) {
             MemberChatroom chatroom = memberChatRoomRepository.findById(roomId)
                     .orElseThrow(() -> new RestApiException(ChattingErrorCode.CHATROOM_NOT_FOUND));
 
-            if (chatDto.getType() != null) {
-                System.out.println("Switch 문 진입");
-                switch (chatDto.getType()) {
-                    case enter -> {
-                        System.out.println("Enter case 실행");
-                        chatroom.enter();
-                        System.out.println("Type is Enter");
-                    }
-                    case leave -> {
-                        System.out.println("Leave case 실행");
-                        chatroom.leave();
-                        System.out.println("Type is Leave");
-                    }
-                    default -> {
-                        System.out.println("Default case 실행 - Invalid type: " + chatDto.getType());
-                        throw new RestApiException(ChattingErrorCode.INVALID_TYPE);
-                    }
+            System.out.println("Switch 문 진입");
+            switch (chatDto.getType()) {
+                case enter -> {
+                    System.out.println("Enter case 실행");
+                    chatroom.enter();
+                    System.out.println("Type is Enter");
                 }
-                System.out.println("Switch 문 완료");
+                case leave -> {
+                    System.out.println("Leave case 실행");
+                    chatroom.leave();
+                    System.out.println("Type is Leave");
+                }
+                default -> {
+                    System.out.println("Default case 실행 - Invalid type: " + chatDto.getType());
+                    throw new RestApiException(ChattingErrorCode.INVALID_TYPE);
+                }
             }
+            System.out.println("Switch 문 완료");
         } else {
             GroupChat newChat = groupChatRepository.save(GroupChat.builder().senderId(sender.getMemberId())
                     .groupChatId(UUID.randomUUID().toString())
