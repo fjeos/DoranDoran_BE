@@ -37,9 +37,16 @@ public class ChatService {
         if (chatDto.getContent() == null) {
             MemberChatroom chatroom = memberChatRoomRepository.findById(roomId)
                     .orElseThrow(() -> new RestApiException(ChattingErrorCode.CHATROOM_NOT_FOUND));
+            System.out.println("Now Chat Type:  " + chatDto.getType());
             switch (chatDto.getType()) {
-                case enter -> chatroom.enter();
-                case leave -> chatroom.leave();
+                case enter -> {
+                    chatroom.enter();
+                    System.out.println("Type is Enter");
+                }
+                case leave -> {
+                    chatroom.leave();
+                    System.out.println("Type is Leave");
+                }
                 default -> throw new RestApiException(ChattingErrorCode.INVALID_TYPE);
             }
         } else {
