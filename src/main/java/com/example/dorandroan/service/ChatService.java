@@ -30,14 +30,15 @@ public class ChatService {
 
     @Transactional
     public void sendGroupMessage(Long roomId, Long memberId, ChatDto chatDto) {
+        log.info("==In the Service Method==");
         Member sender = memberService.findMember(memberId);
         if (validateChattingMember(sender, roomId, true))
             throw new RestApiException(ChattingErrorCode.NOT_PART_IN);
 
+        System.out.println("Now Chat Type:  " + chatDto.getType());
         if (chatDto.getContent() == null) {
             MemberChatroom chatroom = memberChatRoomRepository.findById(roomId)
                     .orElseThrow(() -> new RestApiException(ChattingErrorCode.CHATROOM_NOT_FOUND));
-            System.out.println("Now Chat Type:  " + chatDto.getType());
             switch (chatDto.getType()) {
                 case enter -> {
                     chatroom.enter();
