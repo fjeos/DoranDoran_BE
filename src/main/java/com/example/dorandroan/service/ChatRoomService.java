@@ -312,13 +312,20 @@ public class ChatRoomService {
     }
 
     public int countGroupUnreadChat(MemberChatroom memberChatroom) {
-        return groupChatRepository.countBySendAtBetween(memberChatroom.getLeaveTime(), memberChatroom.getEnterTime());
+        int i = groupChatRepository.countByChatRoomIdAndSendAtAfter(memberChatroom.getGroupChatroom().getGroupChatroomId(),
+                                                                    memberChatroom.getLeaveTime());
+        System.out.println("Now member:  " + memberChatroom.getMember().getNickname());
+        System.out.println("Now Chatroom  :" + memberChatroom.getGroupChatroom().getGroupChatroomId() + " - " + memberChatroom.getGroupChatroom().getTitle());
+        System.out.println("Leave Time:  " + memberChatroom.getLeaveTime());
+        System.out.println("Unread Count:  " + i);
+        return i;
     }
 
     public int countPrivateUnreadChat(Member nowMember, PrivateChatroom privateChatroom) {
         if (chatAndMemberUtil.amIMemberA(privateChatroom, nowMember))
-            return privateChatRepository.countBySendAtBetween(privateChatroom.getALeaveTime(), privateChatroom.getAEnterTime());
+            return privateChatRepository.countByChatRoomIdAndSendAtAfter(privateChatroom.getPrivateChatroomId(),
+                    privateChatroom.getALeaveTime());
         else
-            return privateChatRepository.countBySendAtBetween(privateChatroom.getBLeaveTime(), privateChatroom.getBEnterTime());
+            return privateChatRepository.countByChatRoomIdAndSendAtAfter(privateChatroom.getPrivateChatroomId(), privateChatroom.getBLeaveTime());
     }
 }
