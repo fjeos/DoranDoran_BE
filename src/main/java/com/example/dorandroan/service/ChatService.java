@@ -40,6 +40,11 @@ public class ChatService {
         System.out.println("Type class: " + (chatDto.getType() != null ? chatDto.getType().getClass() : "null"));
         System.out.println("Now Chat Type:  " + chatDto.getType());
         System.out.println("Now Content:  " + chatDto.getContent());
+        if (chatDto.getContent() == null)
+            System.out.println("Content is null");
+        else System.out.println("Content is not null");
+        if (chatDto.getContent().equals("null"))
+            System.out.println("스트링으로 들어옴");
         if (chatDto.getContent() == null) {
             MemberChatroom chatroom = memberChatRoomRepository.findById(roomId)
                     .orElseThrow(() -> new RestApiException(ChattingErrorCode.CHATROOM_NOT_FOUND));
