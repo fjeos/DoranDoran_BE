@@ -30,25 +30,38 @@ public class ChatService {
 
     @Transactional
     public void sendGroupMessage(Long roomId, Long memberId, ChatDto chatDto) {
-        log.info("==In the Service Method==");
         Member sender = memberService.findMember(memberId);
         if (validateChattingMember(sender, roomId, true))
             throw new RestApiException(ChattingErrorCode.NOT_PART_IN);
 
+        System.out.println("=== Switch 문 실행 전 ===");
+        System.out.println("chatDto: " + chatDto);
+        System.out.println("chatDto.getType(): " + chatDto.getType());
+        System.out.println("Type class: " + (chatDto.getType() != null ? chatDto.getType().getClass() : "null"));
         System.out.println("Now Chat Type:  " + chatDto.getType());
         if (chatDto.getContent() == null) {
             MemberChatroom chatroom = memberChatRoomRepository.findById(roomId)
                     .orElseThrow(() -> new RestApiException(ChattingErrorCode.CHATROOM_NOT_FOUND));
-            switch (chatDto.getType()) {
-                case enter -> {
-                    chatroom.enter();
-                    System.out.println("Type is Enter");
+
+            if (chatDto.getType() != null) {
+                System.out.println("Switch 문 진입");
+                switch (chatDto.getType()) {
+                    case enter -> {
+                        System.out.println("Enter case 실행");
+                        chatroom.enter();
+                        System.out.println("Type is Enter");
+                    }
+                    case leave -> {
+                        System.out.println("Leave case 실행");
+                        chatroom.leave();
+                        System.out.println("Type is Leave");
+                    }
+                    default -> {
+                        System.out.println("Default case 실행 - Invalid type: " + chatDto.getType());
+                        throw new RestApiException(ChattingErrorCode.INVALID_TYPE);
+                    }
                 }
-                case leave -> {
-                    chatroom.leave();
-                    System.out.println("Type is Leave");
-                }
-                default -> throw new RestApiException(ChattingErrorCode.INVALID_TYPE);
+                System.out.println("Switch 문 완료");
             }
         } else {
             GroupChat newChat = groupChatRepository.save(GroupChat.builder().senderId(sender.getMemberId())
