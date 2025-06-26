@@ -34,43 +34,15 @@ public class ChatService {
         if (validateChattingMember(sender, roomId, true))
             throw new RestApiException(ChattingErrorCode.NOT_PART_IN);
 
-        System.out.println("=== Switch 문 실행 전 ===");
-        System.out.println("chatDto: " + chatDto);
-        System.out.println("chatDto.getType(): " + chatDto.getType());
-        System.out.println("Type class: " + (chatDto.getType() != null ? chatDto.getType().getClass() : "null"));
-        System.out.println("Now Chat Type:  " + chatDto.getType());
-        System.out.println("Now Content:  " + chatDto.getContent());
-        if (chatDto.getContent() == null)
-            System.out.println("Content is null");
-        else System.out.println("Content is not null");
-        if (chatDto.getContent().equals("null"))
-            System.out.println("스트링으로 들어옴");
-        if (chatDto.getType() != null)
-            System.out.println("타입 널 아님");
-        else
-            System.out.println("타입 널임");
         if (chatDto.getContent() == null) {
             MemberChatroom chatroom = memberChatRoomRepository.findById(roomId)
                     .orElseThrow(() -> new RestApiException(ChattingErrorCode.CHATROOM_NOT_FOUND));
 
-            System.out.println("Switch 문 진입");
             switch (chatDto.getType()) {
-                case enter -> {
-                    System.out.println("Enter case 실행");
-                    chatroom.enter();
-                    System.out.println("Type is Enter");
-                }
-                case leave -> {
-                    System.out.println("Leave case 실행");
-                    chatroom.leave();
-                    System.out.println("Type is Leave");
-                }
-                default -> {
-                    System.out.println("Default case 실행 - Invalid type: " + chatDto.getType());
-                    throw new RestApiException(ChattingErrorCode.INVALID_TYPE);
-                }
+                case enter -> chatroom.enter();
+                case leave -> chatroom.leave();
+                default -> throw new RestApiException(ChattingErrorCode.INVALID_TYPE);
             }
-            System.out.println("Switch 문 완료");
         } else {
             GroupChat newChat = groupChatRepository.save(GroupChat.builder().senderId(sender.getMemberId())
                     .groupChatId(UUID.randomUUID().toString())
@@ -80,24 +52,19 @@ public class ChatService {
                     .sendAt(Instant.now())
                     .build());
             template.convertAndSend("/sub/group/" + roomId, ChatResponseDto.toDto(newChat, sender));
-            chatAndMemberUtil.findGroupChatroomMembers(roomId).forEach(m -> sendAlert(m.getMemberId()));
+            sendGroupRoomAlert(roomId);
         }
     }
 
     @Transactional
-    public void sendSystemMessage(Long roomId, boolean isGroup, MessageType type, String message) {
-        ChatResponseDto systemChat;
-        if (isGroup) {
-            systemChat = ChatResponseDto.toDto(groupChatRepository.save(GroupChat.builder()
-                    .senderId(-1L).groupChatId(UUID.randomUUID().toString())
-                    .chatRoomId(roomId).content(message).type(type).sendAt(Instant.now()).build()), null);
-        } else {
-            systemChat = ChatResponseDto.toDto(privateChatRepository.save(PrivateChat.builder().chatRoomId(roomId)
-                    .privateChatId(UUID.randomUUID().toString())
-                    .type(type).senderId(-1L).sendAt(Instant.now()).build()), null);
-        }
-        String destination = isGroup ? "group" : "private";
-        template.convertAndSend("/sub/" + destination + "/" + roomId, systemChat);
+    public void sendSystemMessage(Long roomId, MessageType type, String message) {
+        template.convertAndSend("/sub/group/" + roomId,
+                ChatResponseDto.toDto(groupChatRepository.save(
+                        GroupChat.builder()
+                                .senderId(-1L).groupChatId(UUID.randomUUID().toString())
+                                .chatRoomId(roomId).content(message).type(type)
+                                .sendAt(Instant.now()).build()), null));
+        sendGroupRoomAlert(roomId);
     }
 
     @Transactional
@@ -136,6 +103,10 @@ public class ChatService {
 
     public void sendAlert(Long memberId) {
         template.convertAndSend("/sub/personal/" + memberId, "");
+    }
+
+    public void sendGroupRoomAlert(Long roomId) {
+        chatAndMemberUtil.findGroupChatroomMembers(roomId).forEach(m -> sendAlert(m.getMemberId()));
     }
 
     private boolean validateChattingMember(Member member, Long roomId, boolean isGroup) {

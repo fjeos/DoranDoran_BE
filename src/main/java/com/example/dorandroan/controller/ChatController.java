@@ -1,12 +1,12 @@
 package com.example.dorandroan.controller;
 
 import com.example.dorandroan.dto.ChatDto;
-import com.example.dorandroan.global.ErrorCode;
 import com.example.dorandroan.global.ErrorResponse;
+import com.example.dorandroan.global.RestApiException;
+import com.example.dorandroan.global.error.ChattingErrorCode;
 import com.example.dorandroan.service.ChatService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
@@ -24,7 +24,6 @@ public class ChatController {
     private final SimpMessagingTemplate template;
     @MessageMapping("/group/{roomId}")
     public void sendGroupMessage(@DestinationVariable Long roomId, ChatDto chatDto, Message<?> messageObj) {
-        log.info("Publishing Message. . .");
         SimpMessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(messageObj, SimpMessageHeaderAccessor.class);
         Long memberId = (Long) accessor.getSessionAttributes().get("memberId");
         chatService.sendGroupMessage(roomId, memberId, chatDto);
@@ -44,7 +43,15 @@ public class ChatController {
     @MessageExceptionHandler
     public void handleException(Throwable ex, Message<?> messageObj) {
         SimpMessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(messageObj, SimpMessageHeaderAccessor.class);
-        template.convertAndSend("/personal/" +
-                accessor.getSessionAttributes().get("memberId"), new ErrorResponse(ex.getMessage(), ex.toString()));
+        Object memberId = accessor.getSessionAttributes().get("memberId");
+        ErrorResponse errorResponse;
+
+        if (ex instanceof RestApiException restEx) {
+            ChattingErrorCode errorCode = (ChattingErrorCode) restEx.getErrorCode();
+            errorResponse = ErrorResponse.of(String.valueOf(errorCode.getStatus()), errorCode.getMessage());
+        } else {
+            errorResponse = ErrorResponse.of(ex.getMessage(), ex.toString());
+        }
+        template.convertAndSend("/sub/personal/" + memberId, errorResponse);
     }
 }
