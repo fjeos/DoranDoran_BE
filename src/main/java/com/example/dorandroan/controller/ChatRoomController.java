@@ -4,6 +4,7 @@ import com.example.dorandroan.dto.*;
 import com.example.dorandroan.global.RestApiException;
 import com.example.dorandroan.global.error.ChattingErrorCode;
 import com.example.dorandroan.global.jwt.CustomUserDetails;
+import com.example.dorandroan.service.ChatAndChatroomUtil;
 import com.example.dorandroan.service.ChatRoomService;
 import com.example.dorandroan.service.GroupChatroomService;
 import com.example.dorandroan.service.PrivateChatroomService;
@@ -24,6 +25,7 @@ public class ChatRoomController {
     private final ChatRoomService chatRoomService;
     private final GroupChatroomService groupChatroomService;
     private final PrivateChatroomService privateChatroomService;
+    private final ChatAndChatroomUtil chatAndChatroomUtil;
 
     @GetMapping("/lists")
     public ResponseEntity<List<MyChatRoomListResponseDto>> getChatRoomLists(@AuthenticationPrincipal CustomUserDetails member) {
@@ -40,7 +42,7 @@ public class ChatRoomController {
     public ResponseEntity<Map<String, Long>> createGroupChatroom(@AuthenticationPrincipal CustomUserDetails member,
                                                                  @Valid @RequestBody ChatRoomRequestDto requestDto) {
 
-        return ResponseEntity.ok(Map.of("chatRoomId", groupChatroomService.createGroupChatroom(member.getMember(), requestDto)));
+        return ResponseEntity.ok(Map.of("chatRoomId", chatAndChatroomUtil.createGroupChatroom(member.getMember(), requestDto)));
     }
 
     @GetMapping("/members")
@@ -77,7 +79,7 @@ public class ChatRoomController {
     @PostMapping("/group")
     public ResponseEntity<Void> enterGroupChatroom(@AuthenticationPrincipal CustomUserDetails member,
                                                    @RequestBody Map<String, Long> requestDto) {
-        groupChatroomService.enterGroupChatroom(member.getMember(), requestDto.get("chatRoomId"));
+        chatAndChatroomUtil.enterGroupChatroom(member.getMember(), requestDto.get("chatRoomId"));
         return ResponseEntity.ok().build();
     }
 
@@ -98,35 +100,35 @@ public class ChatRoomController {
     @PatchMapping("/info/title")
     public ResponseEntity<Void> changeRoomTitle(@AuthenticationPrincipal CustomUserDetails member,
                                                 @Valid @RequestBody ChatRoomTitleUpdateDto requestDto) {
-        groupChatroomService.changeRoomTitle(member.getMember(), requestDto);
+        chatAndChatroomUtil.changeRoomTitle(member.getMember(), requestDto);
         return ResponseEntity.ok().build();
     }
 
     @PatchMapping("/info/image")
     public ResponseEntity<Void> changeRoomImage(@AuthenticationPrincipal CustomUserDetails member,
                                                 @Valid @RequestBody ChatRoomImageUpdateDto requestDto) {
-        groupChatroomService.changeRoomImage(member.getMember(), requestDto);
+        chatAndChatroomUtil.changeRoomImage(member.getMember(), requestDto);
         return ResponseEntity.ok().build();
     }
 
     @PatchMapping("/info/count")
     public ResponseEntity<Void> changeRoomMaxCount(@AuthenticationPrincipal CustomUserDetails member,
                                                    @Valid @RequestBody ChatRoomMaxUpdateDto requestDto) {
-        groupChatroomService.changeRoomMaxCount(member.getMember(), requestDto);
+        chatAndChatroomUtil.changeRoomMaxCount(member.getMember(), requestDto);
         return ResponseEntity.ok().build();
     }
 
     @PatchMapping("/info/description")
     public ResponseEntity<Void> changeRoomDescription(@AuthenticationPrincipal CustomUserDetails member,
                                                       @Valid @RequestBody ChatRoomDescriptionUpdateDto requestDto) {
-        groupChatroomService.changeRoomDescription(member.getMember(), requestDto);
+        chatAndChatroomUtil.changeRoomDescription(member.getMember(), requestDto);
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/shutdown")
     public ResponseEntity<Void> deleteGroupChatRoom(@AuthenticationPrincipal CustomUserDetails member,
                                                     @RequestParam("groupId") Long chatRoomId) {
-        groupChatroomService.deleteGroupChatRoom(member.getMember(), chatRoomId);
+        chatAndChatroomUtil.deleteGroupChatRoom(member.getMember(), chatRoomId);
         return ResponseEntity.ok().build();
     }
 
@@ -138,7 +140,7 @@ public class ChatRoomController {
             privateChatroomService.outOfPrivateChatRoom(member.getMember(), privateId);
             return ResponseEntity.ok().build();
         } else if (privateId == null) {
-            groupChatroomService.outOfGroupChatRoom(member.getMember(), groupId);
+            chatAndChatroomUtil.outOfGroupChatRoom(member.getMember(), groupId);
             return ResponseEntity.ok().build();
         } else {
             throw new RestApiException(ChattingErrorCode.ILLEGAL_PARAMETER);

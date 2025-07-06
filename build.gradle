@@ -42,6 +42,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-mail'
     implementation platform('software.amazon.awssdk:bom:2.20.56')
     implementation 'software.amazon.awssdk:s3'
+    implementation 'com.google.firebase:firebase-admin:9.3.0'
+    implementation 'com.fasterxml.jackson.core:jackson-core'
 
 
     implementation 'io.jsonwebtoken:jjwt-api:0.11.5'

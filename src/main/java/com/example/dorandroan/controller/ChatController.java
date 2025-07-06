@@ -5,6 +5,7 @@ import com.example.dorandroan.global.ErrorResponse;
 import com.example.dorandroan.global.RestApiException;
 import com.example.dorandroan.global.error.ChattingErrorCode;
 import com.example.dorandroan.service.ChatService;
+import com.google.firebase.messaging.FirebaseMessagingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.Message;
@@ -15,6 +16,9 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+
+import java.io.IOException;
 
 @Slf4j
 @Controller
@@ -23,14 +27,14 @@ public class ChatController {
     private final ChatService chatService;
     private final SimpMessagingTemplate template;
     @MessageMapping("/group/{roomId}")
-    public void sendGroupMessage(@DestinationVariable Long roomId, ChatDto chatDto, Message<?> messageObj) {
+    public void sendGroupMessage(@DestinationVariable Long roomId, ChatDto chatDto, Message<?> messageObj) throws FirebaseMessagingException, IOException {
         SimpMessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(messageObj, SimpMessageHeaderAccessor.class);
         Long memberId = (Long) accessor.getSessionAttributes().get("memberId");
         chatService.sendGroupMessage(roomId, memberId, chatDto);
     }
 
     @MessageMapping("/private/{roomId}")
-    public void sendPrivateMessage(@DestinationVariable Long roomId, ChatDto chatDto, Message<?> messageObj) {
+    public void sendPrivateMessage(@DestinationVariable Long roomId, ChatDto chatDto, Message<?> messageObj) throws FirebaseMessagingException, IOException {
         SimpMessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(messageObj, SimpMessageHeaderAccessor.class);
         chatService.sendPrivateMessage(roomId, (Long) accessor.getSessionAttributes().get("memberId"), chatDto);
     }

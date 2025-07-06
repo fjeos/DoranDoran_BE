@@ -5,12 +5,14 @@ import com.example.dorandroan.dto.ChatResponseDto;
 import com.example.dorandroan.entity.*;
 import com.example.dorandroan.global.RestApiException;
 import com.example.dorandroan.global.error.ChattingErrorCode;
+import com.google.firebase.messaging.FirebaseMessagingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -27,7 +29,7 @@ public class ChatService {
     private final FcmService fcmService;
 
     @Transactional
-    public void sendGroupMessage(Long roomId, Long memberId, ChatDto chatDto) {
+    public void sendGroupMessage(Long roomId, Long memberId, ChatDto chatDto) throws FirebaseMessagingException, IOException {
         Member sender = memberService.findMember(memberId);
         if (validateChattingMember(sender, roomId, true))
             throw new RestApiException(ChattingErrorCode.NOT_PART_IN);
@@ -50,7 +52,7 @@ public class ChatService {
                     .build());
             template.convertAndSend("/sub/group/" + roomId, ChatResponseDto.toDto(newChat, sender));
             sendGroupRoomAlert(roomId);
-            fcmService.sendFcmMessage(sender, group);
+            fcmService.sendFcmMessage(sender, groupChatroomService.findChatroom(roomId).getTitle(), chatDto.getContent());
         }
     }
 
@@ -66,7 +68,7 @@ public class ChatService {
     }
 
     @Transactional
-    public void sendPrivateMessage(Long roomId, Long memberId, ChatDto chatDto) {
+    public void sendPrivateMessage(Long roomId, Long memberId, ChatDto chatDto) throws FirebaseMessagingException, IOException {
         Member sender = memberService.findMember(memberId);
         if (validateChattingMember(sender, roomId, false))
             throw new RestApiException(ChattingErrorCode.NOT_PART_IN);
@@ -95,6 +97,7 @@ public class ChatService {
                     .build());
             template.convertAndSend("/sub/private/" + roomId, ChatResponseDto.toDto(newChat, sender));
             sendAlert(chatAndMemberUtil.findOtherAtPrivateChatroom(roomId, sender).getMemberId());
+            sendPrivateFcm(sender, roomId, chatDto.getContent());
         }
     }
 
@@ -112,5 +115,10 @@ public class ChatService {
         } else {
             return privateChatroomService.validateChattingMember(member, roomId).isEmpty();
         }
+    }
+
+    private void sendPrivateFcm(Member member, Long roomId, String content) throws FirebaseMessagingException, IOException {
+        Member other = chatAndMemberUtil.findOtherAtPrivateChatroom(roomId, member);
+        fcmService.sendFcmMessage(member, other.getNickname(), content);
     }
 }

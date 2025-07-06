@@ -93,6 +93,6 @@ public class PrivateChatroomService {
 
     public PrivateChatroom findById(Long roomId) {
         return privateChatroomRepository.findById(roomId)
-                .orElseThrow(() -> new RestApiException(ChattingErrorCode.CHATROOM_NOT_FOUND))
+                .orElseThrow(() -> new RestApiException(ChattingErrorCode.CHATROOM_NOT_FOUND));
     }
 }
