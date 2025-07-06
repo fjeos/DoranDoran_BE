@@ -5,13 +5,14 @@ import com.example.dorandroan.global.RestApiException;
 import com.example.dorandroan.global.error.ChattingErrorCode;
 import com.example.dorandroan.global.jwt.CustomUserDetails;
 import com.example.dorandroan.service.ChatRoomService;
+import com.example.dorandroan.service.GroupChatroomService;
+import com.example.dorandroan.service.PrivateChatroomService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.awt.print.Pageable;
 import java.util.List;
 import java.util.Map;
 
@@ -21,6 +22,8 @@ import java.util.Map;
 public class ChatRoomController {
 
     private final ChatRoomService chatRoomService;
+    private final GroupChatroomService groupChatroomService;
+    private final PrivateChatroomService privateChatroomService;
 
     @GetMapping("/lists")
     public ResponseEntity<List<MyChatRoomListResponseDto>> getChatRoomLists(@AuthenticationPrincipal CustomUserDetails member) {
@@ -30,14 +33,14 @@ public class ChatRoomController {
     @GetMapping("/info")
     public ResponseEntity<ChatroomInfoResponseDto> getGroupChatroomInfo(@AuthenticationPrincipal CustomUserDetails member,
                                                      @RequestParam("id") Long chatRoomId) {
-        return ResponseEntity.ok(chatRoomService.getGroupChatroomInfo(member.getMember(), chatRoomId));
+        return ResponseEntity.ok(groupChatroomService.getGroupChatroomInfo(member.getMember(), chatRoomId));
     }
 
     @PostMapping("/chatrooms")
     public ResponseEntity<Map<String, Long>> createGroupChatroom(@AuthenticationPrincipal CustomUserDetails member,
                                                                  @Valid @RequestBody ChatRoomRequestDto requestDto) {
 
-        return ResponseEntity.ok(Map.of("chatRoomId", chatRoomService.createGroupChatroom(member.getMember(), requestDto)));
+        return ResponseEntity.ok(Map.of("chatRoomId", groupChatroomService.createGroupChatroom(member.getMember(), requestDto)));
     }
 
     @GetMapping("/members")
@@ -45,9 +48,9 @@ public class ChatRoomController {
                                                                                @RequestParam(value = "privateId", required = false) Long privateId,
                                                                                @AuthenticationPrincipal CustomUserDetails userDetails) {
         if (groupId == null) {
-            return ResponseEntity.ok(chatRoomService.getPrivateChatRoomMembers(userDetails.getMember().getMemberId(), privateId));
+            return ResponseEntity.ok(privateChatroomService.getPrivateChatRoomMembers(userDetails.getMember().getMemberId(), privateId));
         } else if (privateId == null) {
-            return ResponseEntity.ok(chatRoomService.getGroupChatRoomMembers(userDetails.getMember(), groupId));
+            return ResponseEntity.ok(groupChatroomService.getGroupChatRoomMembers(userDetails.getMember(), groupId));
         } else {
             throw new RestApiException(ChattingErrorCode.ILLEGAL_PARAMETER);
         }
@@ -68,13 +71,13 @@ public class ChatRoomController {
     public ResponseEntity<Map<String, Long>> createPrivateChatroom(@AuthenticationPrincipal CustomUserDetails member,
                                                                    @RequestBody Map<String, Long> requestDto) {
         return ResponseEntity.ok(Map.of("chatRoomId",
-                chatRoomService.createPrivateChatroom(member.getMember(), requestDto.get("memberId"))));
+                privateChatroomService.createPrivateChatroom(member.getMember(), requestDto.get("memberId"))));
     }
 
     @PostMapping("/group")
     public ResponseEntity<Void> enterGroupChatroom(@AuthenticationPrincipal CustomUserDetails member,
                                                    @RequestBody Map<String, Long> requestDto) {
-        chatRoomService.enterGroupChatroom(member.getMember(), requestDto.get("chatRoomId"));
+        groupChatroomService.enterGroupChatroom(member.getMember(), requestDto.get("chatRoomId"));
         return ResponseEntity.ok().build();
     }
 
@@ -95,35 +98,35 @@ public class ChatRoomController {
     @PatchMapping("/info/title")
     public ResponseEntity<Void> changeRoomTitle(@AuthenticationPrincipal CustomUserDetails member,
                                                 @Valid @RequestBody ChatRoomTitleUpdateDto requestDto) {
-        chatRoomService.changeRoomTitle(member.getMember(), requestDto);
+        groupChatroomService.changeRoomTitle(member.getMember(), requestDto);
         return ResponseEntity.ok().build();
     }
 
     @PatchMapping("/info/image")
     public ResponseEntity<Void> changeRoomImage(@AuthenticationPrincipal CustomUserDetails member,
                                                 @Valid @RequestBody ChatRoomImageUpdateDto requestDto) {
-        chatRoomService.changeRoomImage(member.getMember(), requestDto);
+        groupChatroomService.changeRoomImage(member.getMember(), requestDto);
         return ResponseEntity.ok().build();
     }
 
     @PatchMapping("/info/count")
     public ResponseEntity<Void> changeRoomMaxCount(@AuthenticationPrincipal CustomUserDetails member,
                                                    @Valid @RequestBody ChatRoomMaxUpdateDto requestDto) {
-        chatRoomService.changeRoomMaxCount(member.getMember(), requestDto);
+        groupChatroomService.changeRoomMaxCount(member.getMember(), requestDto);
         return ResponseEntity.ok().build();
     }
 
     @PatchMapping("/info/description")
     public ResponseEntity<Void> changeRoomDescription(@AuthenticationPrincipal CustomUserDetails member,
                                                       @Valid @RequestBody ChatRoomDescriptionUpdateDto requestDto) {
-        chatRoomService.changeRoomDescription(member.getMember(), requestDto);
+        groupChatroomService.changeRoomDescription(member.getMember(), requestDto);
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/shutdown")
     public ResponseEntity<Void> deleteGroupChatRoom(@AuthenticationPrincipal CustomUserDetails member,
                                                     @RequestParam("groupId") Long chatRoomId) {
-        chatRoomService.deleteGroupChatRoom(member.getMember(), chatRoomId);
+        groupChatroomService.deleteGroupChatRoom(member.getMember(), chatRoomId);
         return ResponseEntity.ok().build();
     }
 
@@ -132,10 +135,10 @@ public class ChatRoomController {
                                               @RequestParam(value = "groupId", required = false) Long groupId,
                                               @RequestParam(value = "privateId", required = false) Long privateId) {
         if (groupId == null) {
-            chatRoomService.outOfPrivateChatRoom(member.getMember(), privateId);
+            privateChatroomService.outOfPrivateChatRoom(member.getMember(), privateId);
             return ResponseEntity.ok().build();
         } else if (privateId == null) {
-            chatRoomService.outOfGroupChatRoom(member.getMember(), groupId);
+            groupChatroomService.outOfGroupChatRoom(member.getMember(), groupId);
             return ResponseEntity.ok().build();
         } else {
             throw new RestApiException(ChattingErrorCode.ILLEGAL_PARAMETER);
@@ -146,6 +149,6 @@ public class ChatRoomController {
     public ResponseEntity<List<ChatRoomListResponseDto>> getGroupChatrooms(@RequestParam(value = "cursor", required = false) Long cursor,
                                                                            @RequestParam("limit") Integer limit) {
 
-        return ResponseEntity.ok(chatRoomService.getGroupChatroomList(cursor, limit));
+        return ResponseEntity.ok(groupChatroomService.getGroupChatroomList(cursor, limit));
     }
 }

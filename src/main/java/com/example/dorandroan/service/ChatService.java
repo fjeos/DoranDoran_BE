@@ -5,7 +5,6 @@ import com.example.dorandroan.dto.ChatResponseDto;
 import com.example.dorandroan.entity.*;
 import com.example.dorandroan.global.RestApiException;
 import com.example.dorandroan.global.error.ChattingErrorCode;
-import com.example.dorandroan.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -22,11 +21,10 @@ import java.util.UUID;
 public class ChatService {
     private final MemberService memberService;
     private final ChatAndMemberUtil chatAndMemberUtil;
-    private final GroupChatRepository groupChatRepository;
-    private final PrivateChatRepository privateChatRepository;
-    private final MemberChatRoomRepository memberChatRoomRepository;
-    private final PrivateChatroomRepository privateChatroomRepository;
+    private final GroupChatroomService groupChatroomService;
+    private final PrivateChatroomService privateChatroomService;
     private final SimpMessagingTemplate template;
+    private final FcmService fcmService;
 
     @Transactional
     public void sendGroupMessage(Long roomId, Long memberId, ChatDto chatDto) {
@@ -35,8 +33,7 @@ public class ChatService {
             throw new RestApiException(ChattingErrorCode.NOT_PART_IN);
 
         if (chatDto.getContent() == null) {
-            MemberChatroom chatroom = memberChatRoomRepository.findById(roomId)
-                    .orElseThrow(() -> new RestApiException(ChattingErrorCode.CHATROOM_NOT_FOUND));
+            MemberChatroom chatroom = groupChatroomService.findMemberChatroom(roomId);
 
             switch (chatDto.getType()) {
                 case enter -> chatroom.enter();
@@ -44,7 +41,7 @@ public class ChatService {
                 default -> throw new RestApiException(ChattingErrorCode.INVALID_TYPE);
             }
         } else {
-            GroupChat newChat = groupChatRepository.save(GroupChat.builder().senderId(sender.getMemberId())
+            GroupChat newChat = groupChatroomService.saveChat(GroupChat.builder().senderId(sender.getMemberId())
                     .groupChatId(UUID.randomUUID().toString())
                     .chatRoomId(roomId)
                     .content(chatDto.getContent())
@@ -53,13 +50,14 @@ public class ChatService {
                     .build());
             template.convertAndSend("/sub/group/" + roomId, ChatResponseDto.toDto(newChat, sender));
             sendGroupRoomAlert(roomId);
+            fcmService.sendFcmMessage(sender, group);
         }
     }
 
     @Transactional
     public void sendSystemMessage(Long roomId, MessageType type, String message) {
         template.convertAndSend("/sub/group/" + roomId,
-                ChatResponseDto.toDto(groupChatRepository.save(
+                ChatResponseDto.toDto(groupChatroomService.saveChat(
                         GroupChat.builder()
                                 .senderId(-1L).groupChatId(UUID.randomUUID().toString())
                                 .chatRoomId(roomId).content(message).type(type)
@@ -74,8 +72,7 @@ public class ChatService {
             throw new RestApiException(ChattingErrorCode.NOT_PART_IN);
 
         if (chatDto.getContent() == null) {
-            PrivateChatroom chatroom = privateChatroomRepository.findById(roomId)
-                    .orElseThrow(() -> new RestApiException(ChattingErrorCode.CHATROOM_NOT_FOUND));
+            PrivateChatroom chatroom = privateChatroomService.findById(roomId);
             boolean amIMemberA = chatAndMemberUtil.amIMemberA(chatroom, sender);
             switch (chatDto.getType()) {
                 case enter -> {
@@ -89,7 +86,7 @@ public class ChatService {
                 default -> throw new RestApiException(ChattingErrorCode.INVALID_TYPE);
             }
         } else {
-            PrivateChat newChat = privateChatRepository.save(PrivateChat.builder().senderId(sender.getMemberId())
+            PrivateChat newChat = privateChatroomService.saveChat(PrivateChat.builder().senderId(sender.getMemberId())
                     .privateChatId(UUID.randomUUID().toString())
                     .chatRoomId(roomId)
                     .content(chatDto.getContent())
@@ -111,10 +108,9 @@ public class ChatService {
 
     private boolean validateChattingMember(Member member, Long roomId, boolean isGroup) {
         if (isGroup) {
-            return !memberChatRoomRepository.
-                    existsByMember_MemberIdAndGroupChatroom_GroupChatroomIdAndQuitFalse(member.getMemberId(), roomId);
+            return !groupChatroomService.validateChattingMember(member.getMemberId(), roomId);
         } else {
-            return privateChatroomRepository.findChatroomByMemberAndNotQuit(member, roomId).isEmpty();
+            return privateChatroomService.validateChattingMember(member, roomId).isEmpty();
         }
     }
 }
