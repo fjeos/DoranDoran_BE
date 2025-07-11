@@ -118,4 +118,14 @@ public class MemberService {
                 .orElseThrow(() -> new RestApiException(MemberErrorCode.MEMBER_NOT_FOUND))
                 .getDeviceToken();
     }
+
+    @Transactional
+    public void saveDeviceToken(Member member, String deviceToken) {
+        member.saveDeviceToken(deviceToken);
+    }
+
+    @Transactional
+    public void deleteDeviceToken(Member member) {
+        member.deleteDeviceToken();
+    }
 }

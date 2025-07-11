@@ -71,6 +71,14 @@ public class Member {
         this.state = true;
     }
 
+    public void saveDeviceToken(String deviceToken) {
+        this.deviceToken = deviceToken;
+    }
+
+    public void deleteDeviceToken() {
+        this.deviceToken = null;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
