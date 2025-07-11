@@ -121,11 +121,11 @@ public class MemberService {
 
     @Transactional
     public void saveDeviceToken(Member member, String deviceToken) {
-        member.saveDeviceToken(deviceToken);
+        findMember(member.getMemberId()).saveDeviceToken(deviceToken);
     }
 
     @Transactional
     public void deleteDeviceToken(Member member) {
-        member.deleteDeviceToken();
+        findMember(member.getMemberId()).deleteDeviceToken();
     }
 }
