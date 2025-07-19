@@ -5,15 +5,20 @@ import com.example.dorandroan.dto.ChatResponseDto;
 import com.example.dorandroan.entity.*;
 import com.example.dorandroan.global.RestApiException;
 import com.example.dorandroan.global.error.ChattingErrorCode;
+import com.example.dorandroan.global.error.CommonErrorCode;
+import com.google.api.Http;
 import com.google.firebase.messaging.FirebaseMessagingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpServerErrorException;
 
 import java.io.IOException;
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -51,8 +56,9 @@ public class ChatService {
                     .sendAt(Instant.now())
                     .build());
             template.convertAndSend("/sub/group/" + roomId, ChatResponseDto.toDto(newChat, sender));
-            sendGroupRoomAlert(roomId);
-            fcmService.sendFcmMessage(sender, groupChatroomService.findChatroom(roomId).getTitle(), chatDto.getContent());
+            List<Member> groupChatroomMembers = chatAndMemberUtil.findGroupChatroomMembers(roomId);
+            sendGroupRoomAlert(groupChatroomMembers);
+            sendGroupFcm(groupChatroomMembers, sender, groupChatroomService.findChatroom(roomId).getTitle(), chatDto.getContent());
         }
     }
 
@@ -64,7 +70,7 @@ public class ChatService {
                                 .senderId(-1L).groupChatId(UUID.randomUUID().toString())
                                 .chatRoomId(roomId).content(message).type(type)
                                 .sendAt(Instant.now()).build()), null));
-        sendGroupRoomAlert(roomId);
+        sendGroupRoomAlert(chatAndMemberUtil.findGroupChatroomMembers(roomId));
     }
 
     @Transactional
@@ -105,10 +111,21 @@ public class ChatService {
         template.convertAndSend("/sub/personal/" + memberId, "");
     }
 
-    public void sendGroupRoomAlert(Long roomId) {
-        chatAndMemberUtil.findGroupChatroomMembers(roomId).forEach(m -> sendAlert(m.getMemberId()));
+    private void sendGroupRoomAlert(List<Member> members) {
+        members.forEach(m -> sendAlert(m.getMemberId()));
     }
 
+    private void sendGroupFcm(List<Member> members, Member sender, String title, String body) {
+        members.forEach(m -> {
+            if (!m.equals(sender)) {
+                try {
+                    fcmService.sendFcmMessage(m, title, body);
+                } catch (FirebaseMessagingException e) {
+                    throw new RestApiException(CommonErrorCode.INTERNAL_SERVER_ERROR);
+                }
+            }
+        });
+    }
     private boolean validateChattingMember(Member member, Long roomId, boolean isGroup) {
         if (isGroup) {
             return !groupChatroomService.validateChattingMember(member.getMemberId(), roomId);
@@ -117,8 +134,8 @@ public class ChatService {
         }
     }
 
-    private void sendPrivateFcm(Member member, Long roomId, String content) throws FirebaseMessagingException, IOException {
+    public void sendPrivateFcm(Member member, Long roomId, String content) throws FirebaseMessagingException, IOException {
         Member other = chatAndMemberUtil.findOtherAtPrivateChatroom(roomId, member);
-        fcmService.sendFcmMessage(member, other.getNickname(), content);
+        fcmService.sendFcmMessage(other, other.getNickname(), content);
     }
 }

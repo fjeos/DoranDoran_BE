@@ -19,7 +19,7 @@ public class FcmService {
     private final MemberService memberService;
     private final FirebaseMessaging firebaseMessaging;
 
-    public void sendFcmMessage(Member member, String title, String body) throws FirebaseMessagingException, IOException {
+    public void sendFcmMessage(Member member, String title, String body) throws FirebaseMessagingException {
         String deviceToken = memberService.getDeviceToken(member);
         firebaseMessaging.send(Message.builder()
                 .setNotification(Notification.builder()
