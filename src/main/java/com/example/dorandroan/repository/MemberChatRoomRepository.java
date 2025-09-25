@@ -11,13 +11,13 @@ import java.util.Optional;
 
 public interface MemberChatRoomRepository extends JpaRepository<MemberChatroom, Long> {
 
-    @Query("SELECT mc FROM MemberChatroom mc WHERE mc.member = :member and mc.quit = false")
+    @Query("SELECT mc FROM MemberChatroom mc WHERE mc.member = :member and mc.leaveTime = null")
     List<MemberChatroom> findChatRoomByMemberAndNotQuit(Member member);
 
     @Query("SELECT mc.member FROM MemberChatroom mc WHERE mc.groupChatroom.groupChatroomId = :chatRoomId")
     List<Member> findMemberByChatRoom(Long chatRoomId);
 
-    boolean existsByMember_MemberIdAndGroupChatroom_GroupChatroomIdAndQuitFalse(Long memberId, Long chatRoomId);
+    boolean existsByMember_MemberIdAndGroupChatroom_GroupChatroomIdAndLeaveTimeIsNull(Long memberId, Long chatRoomId);
 
     @Query("SELECT mc FROM MemberChatroom  mc WHERE  mc.member = :member and mc.groupChatroom.groupChatroomId = :chatRoomId")
     Optional<MemberChatroom> findChatRoomByMemberAndChatRoomId(Member member, Long chatRoomId);

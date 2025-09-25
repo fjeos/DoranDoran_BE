@@ -35,7 +35,6 @@ public class ChatAndChatroomUtil {
                 .build());
         memberChatRoomRepository.save(MemberChatroom.builder().member(member)
                 .role(ChatRoomRole.LEAD)
-                .quit(false)
                 .groupChatroom(newChatRoom).build());
 
         chatService.sendSystemMessage(newChatRoom.getGroupChatroomId(), MessageType.system, "채팅방이 생성되었습니다.");
@@ -48,7 +47,7 @@ public class ChatAndChatroomUtil {
         GroupChatroom groupChatroom = groupChatRoomRepository.findById(chatRoomId)
                 .orElseThrow(() -> new RestApiException(ChattingErrorCode.CHATROOM_NOT_FOUND));
 
-        if (memberChatRoomRepository.existsByMember_MemberIdAndGroupChatroom_GroupChatroomIdAndQuitFalse(
+        if (memberChatRoomRepository.existsByMember_MemberIdAndGroupChatroom_GroupChatroomIdAndLeaveTimeIsNull(
                 member.getMemberId(), chatRoomId))
             throw new RestApiException(ChattingErrorCode.ALREADY_JOINED);
 
@@ -60,7 +59,7 @@ public class ChatAndChatroomUtil {
                 .member(memberService.findMember(member.getMemberId()))
                 .role(ChatRoomRole.PART)
                 .joinTime(Instant.now())
-                .quit(false).build());
+                .build());
         chatService.sendSystemMessage(chatRoomId, MessageType.system, member.getNickname() + "님이 입장하셨습니다.");
         groupChatroom.enterRoom();
     }
@@ -97,7 +96,11 @@ public class ChatAndChatroomUtil {
 
     @Transactional
     public void deleteGroupChatRoom(Member member, Long chatRoomId) {
-        getMemberChatroomForUpdate(member, chatRoomId).delete();
+        GroupChatroom chatroom = getMemberChatroomForUpdate(member, chatRoomId);
+        chatroom.delete();
+        chatroom.closeChatroom();
+        memberChatRoomRepository.findChatRoomByMemberAndChatRoomId(member, chatRoomId)
+                .orElseThrow(() -> new RestApiException(ChattingErrorCode.CHATROOM_NOT_FOUND)).leave();
         chatService.sendSystemMessage(chatRoomId, MessageType.system, "채팅방이 폐쇄되었습니다.");
     }
 
@@ -105,10 +108,10 @@ public class ChatAndChatroomUtil {
     public void outOfGroupChatRoom(Member member, Long groupId) {
         MemberChatroom chatroom = memberChatRoomRepository.findChatRoomByMemberAndChatRoomId(member, groupId)
                 .orElseThrow(() -> new RestApiException(ChattingErrorCode.CHATROOM_NOT_FOUND));
-        if (chatroom.isQuit())
+        if (chatroom.getLeaveTime() != null)
             throw new RestApiException(ChattingErrorCode.NOT_PART_IN);
         chatService.sendSystemMessage(groupId, MessageType.system, member.getNickname() + "님이 퇴장하셨습니다.");
-        chatroom.out();
+        chatroom.leave();
         groupChatRoomRepository.findById(groupId)
                 .orElseThrow(() -> new RestApiException(ChattingErrorCode.CHATROOM_NOT_FOUND)).leaveRoom();
     }

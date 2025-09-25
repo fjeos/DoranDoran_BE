@@ -25,9 +25,6 @@ public class MemberChatroom {
     @Enumerated(EnumType.STRING)
     private ChatRoomRole role;
 
-    @Column(nullable = false)
-    private boolean quit;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "group_chatroom_id")
     private GroupChatroom groupChatroom;
@@ -40,10 +37,6 @@ public class MemberChatroom {
 
     @Column
     private Instant leaveTime;
-
-    public void out() {
-        this.quit = true;
-    }
 
     public void enter() {
         this.enterTime = Instant.now();

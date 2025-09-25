@@ -79,7 +79,7 @@ public class GroupChatroomService {
 
     public boolean validateChattingMember(Long memberId, Long roomId) {
         return memberChatRoomRepository.
-                existsByMember_MemberIdAndGroupChatroom_GroupChatroomIdAndQuitFalse(memberId, roomId);
+                existsByMember_MemberIdAndGroupChatroom_GroupChatroomIdAndLeaveTimeIsNull(memberId, roomId);
     }
 
     public GroupChat saveChat(GroupChat groupChat) {

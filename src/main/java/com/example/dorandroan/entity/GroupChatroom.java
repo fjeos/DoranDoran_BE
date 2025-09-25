@@ -60,6 +60,11 @@ public class GroupChatroom {
         this.description = description;
     }
 
+    public void closeChatroom() {
+        this.nowPartIn = 0;
+        this.maxPartIn = 0;
+    }
+
     public void delete() {
         this.closed = true;
     }
