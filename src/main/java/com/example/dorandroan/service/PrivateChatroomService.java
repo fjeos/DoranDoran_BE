@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -51,7 +52,9 @@ public class PrivateChatroomService {
         return privateChatroomRepository.save(
                 PrivateChatroom.builder()
                         .memberA(nowMember)
-                        .memberB(otherMember).build()).getPrivateChatroomId();
+                        .memberB(otherMember)
+                        .aEnterTime(Instant.now())
+                        .bEnterTime(Instant.now()).build()).getPrivateChatroomId();
     }
 
     @Transactional
