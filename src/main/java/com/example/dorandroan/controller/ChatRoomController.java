@@ -47,16 +47,8 @@ public class ChatRoomController {
 
     @GetMapping("/members")
     public ResponseEntity<List<ChatRoomMembersResponseDto>> getChatRoomMembers(@RequestParam(value = "groupId", required = false) Long groupId,
-                                                                               @RequestParam(value = "privateId", required = false) Long privateId,
                                                                                @AuthenticationPrincipal CustomUserDetails userDetails) {
-        if (groupId == null) {
-            return ResponseEntity.ok(privateChatroomService.getPrivateChatRoomMembers(userDetails.getMember().getMemberId(), privateId));
-        } else if (privateId == null) {
             return ResponseEntity.ok(groupChatroomService.getGroupChatRoomMembers(userDetails.getMember(), groupId));
-        } else {
-            throw new RestApiException(ChattingErrorCode.ILLEGAL_PARAMETER);
-        }
-
     }
 
     @GetMapping("/profile")
