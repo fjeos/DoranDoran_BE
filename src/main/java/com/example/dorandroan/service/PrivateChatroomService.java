@@ -45,16 +45,13 @@ public class PrivateChatroomService {
         if (nowMember.equals(otherMember) || nowMember.getState() || otherMember.getState() || !otherMember.getRecommends())
             throw new RestApiException(ChattingErrorCode.INVALID_MEMBER);
 
-        if (privateChatroomRepository.findByTwoMembers(nowMember, otherMember).isPresent()) {
-            throw new RestApiException(ChattingErrorCode.ALREADY_JOINED);
-        }
-
-        return privateChatroomRepository.save(
+        return privateChatroomRepository.findByTwoMembers(nowMember, otherMember)
+                .orElseGet(() -> privateChatroomRepository.save(
                 PrivateChatroom.builder()
                         .memberA(nowMember)
                         .memberB(otherMember)
                         .aEnterTime(Instant.now())
-                        .bEnterTime(Instant.now()).build()).getPrivateChatroomId();
+                        .bEnterTime(Instant.now()).build())).getPrivateChatroomId();
     }
 
     @Transactional
